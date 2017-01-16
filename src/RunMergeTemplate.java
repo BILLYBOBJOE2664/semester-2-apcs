@@ -4,7 +4,7 @@ class RunMergeTemplate {
 
 	public static void main(String[] args) {
 
-		MergeTemplate testMerge = new MergeTemplate();
+		P2_Peng_Kevin_MergeTemplate testMerge = new P2_Peng_Kevin_MergeTemplate();
 
 		ArrayList<Comparable> a;
 		ArrayList<Comparable> b;

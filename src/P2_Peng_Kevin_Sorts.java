@@ -9,6 +9,12 @@ import java.util.*;
  * @author     Kevin Peng
  * @created    January 12, 2017
  */
+/*
+ * Merge sort
+ * 1/16/2017
+ * took 20 minutes
+ * I did not have any problems. I found that I do not need a base case of two elements and I'm not sure why it exists since I can merge two on element arrays. I guess it is more efficient or something.
+ */
 public class P2_Peng_Kevin_Sorts{
   private long steps;
 
@@ -96,11 +102,34 @@ public class P2_Peng_Kevin_Sorts{
    * @param  last   last index of range of values to be sorted
    */
   private void merge(ArrayList <Comparable> a, int first, int mid, int last){
-	//replace these lines with your code
-	System.out.println();
-	System.out.println("Merge");
-	System.out.println();
-
+	  steps+=3;
+	  //pointer for first section
+	  int pa = first;
+	  //pointer for second section
+	  int pb = mid + 1;
+	  //temp list
+	  ArrayList<Comparable> temp = new ArrayList<>();
+	  for(int i = 0; i < last - first + 1; i++){
+		  steps++;
+		  if(pa > mid){
+			  steps+=2;
+			  temp.add(a.get(pb));
+			  pb++;
+		  }else if(pb > last || a.get(pa).compareTo(a.get(pb)) < 0){
+			  steps+=2;
+			  temp.add(a.get(pa));
+			  pa++;
+		  }else{
+			  steps+=2;
+			  temp.add(a.get(pb));
+			  pb++;
+		  }
+	  }
+	  //copy the temp list over
+	  for(int i = 0; i < temp.size(); i++){
+		  steps++;
+		  a.set(first + i, temp.get(i));
+	  }
   }
 
   /**
@@ -111,10 +140,21 @@ public class P2_Peng_Kevin_Sorts{
    * @param  last   ending index of range of values to be sorted
    */
   public void mergeSort(ArrayList <Comparable> a, int first, int last){
-	//replace these lines with your code
-	System.out.println();
-	System.out.println("Merge Sort");
-	System.out.println();
+	  steps+=2;
+	if(last - first == 0){
+		return;
+	}else if(last - first == 1){
+		steps++;
+		if(a.get(first).compareTo(a.get(last)) > 0){
+			swap(a, first, last);
+		}
+	}else{
+		steps++;
+		int mid = (first + last)/2;
+		mergeSort(a, first, mid);
+		mergeSort(a, mid + 1, last);
+		merge(a, first, mid, last);
+	}
   }
 
  

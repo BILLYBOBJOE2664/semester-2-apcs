@@ -14,7 +14,7 @@ import java.util.Scanner;
  * @author Kevin Peng, Period 2
  *
  */
-public class MergeTemplate {
+public class P2_Peng_Kevin_MergeTemplate {
  
 	/**
 	*  Sorts any ArrayList of Comparable objects using Selection Sort.
