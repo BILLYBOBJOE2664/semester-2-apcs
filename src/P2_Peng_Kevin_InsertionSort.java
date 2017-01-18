@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.Arrays;
 
 /*
@@ -28,13 +29,13 @@ public class P2_Peng_Kevin_InsertionSort {
 		P2_Peng_Kevin_YelpRating y5 = new P2_Peng_Kevin_YelpRating("a", "b", 3, "fdew");
 		P2_Peng_Kevin_YelpRating y6 = new P2_Peng_Kevin_YelpRating("a", "b", 5, "f");
 		
-		P2_Peng_Kevin_YelpRating[] arr3 = {y1, y2, y3, y4, y5, y6};
-		System.out.println("Starting array: " + Arrays.toString(arr3));
+		ArrayList<P2_Peng_Kevin_YelpRating> arr3 = new ArrayList<>(Arrays.asList(y1, y2, y3, y4, y5, y6));
+		System.out.println("Starting array: " + arr3);
 		insertionSort3(arr3);
-		System.out.println("Ending array: " + Arrays.toString(arr3));
+		System.out.println("Ending array: " + arr3);
 	}
 	
-	private static void insertionSort1(int[] arr){
+	public static void insertionSort1(int[] arr){
 		for(int i = 1; i < arr.length; i++){
 			int key = arr[i];
 			int position = i;
@@ -46,7 +47,7 @@ public class P2_Peng_Kevin_InsertionSort {
 		}
 	}
 	
-	private static void insertionSort2(String[] arr){
+	public static void insertionSort2(String[] arr){
 		for(int i = arr.length - 2; i >= 0; i--){
 			String key = arr[i];
 			int position = i;
@@ -58,15 +59,15 @@ public class P2_Peng_Kevin_InsertionSort {
 		}
 	}
 	
-	private static void insertionSort3(P2_Peng_Kevin_YelpRating[] arr){
-		for(int i = 1; i < arr.length; i++){
-			P2_Peng_Kevin_YelpRating key = arr[i];
+	public static void insertionSort3(ArrayList<P2_Peng_Kevin_YelpRating> arr){
+		for(int i = 1; i < arr.size(); i++){
+			P2_Peng_Kevin_YelpRating key = arr.get(i);
 			int position = i;
-			while(position > 0 && arr[position - 1].compareTo(key) < 0){
-				arr[position] = arr[position - 1];
+			while(position > 0 && arr.get(position - 1).compareTo(key) < 0){
+				arr.set(position, arr.get(position - 1));
 				position--;
 			}
-			arr[position] = key;
+			arr.set(position, key);
 		}
 	}
 }

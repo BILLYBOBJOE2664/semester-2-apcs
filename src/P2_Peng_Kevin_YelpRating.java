@@ -38,13 +38,18 @@ public class P2_Peng_Kevin_YelpRating implements Comparable<P2_Peng_Kevin_YelpRa
 	private String userName;
 	@Override
 	public int compareTo(P2_Peng_Kevin_YelpRating other) {
-		// TODO Auto-generated method stub
-		return (int)Math.round(rating - other.getRating());
+		if(rating > other.getRating()){
+			return 1;
+		}else if(rating < other.getRating()){
+			return -1;
+		}else{
+			return 0;
+		}
 	}
 	
 	@Override
 	public String toString() {
-		return("Target: " + target +"\nReview: " + review +"\nRating: " + rating + "\nUser: " + userName + "\n");
+		return("Target:  " + target +"\nReview:  " + review +"\nRating:  " + rating + "\nUser:    " + userName + "\n");
 	}
 
 }
