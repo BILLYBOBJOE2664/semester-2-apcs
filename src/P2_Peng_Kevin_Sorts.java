@@ -156,6 +156,22 @@ public class P2_Peng_Kevin_Sorts{
 		merge(a, first, mid, last);
 	}
   }
+  
+  public void slowSort(ArrayList<Comparable> a, int first, int last){
+	  steps++;
+	  if(last - first == 0){
+		  return;
+	  }
+	  steps++;
+	  int mid = (first + last)/2;
+	  slowSort(a, first, mid);
+	  slowSort(a, mid + 1, last);
+	  steps++;
+	  if(a.get(mid).compareTo(a.get(last)) > 0){
+		  swap(a, mid, last);
+	  }
+	  slowSort(a, first, last - 1);
+  }
 
  
   /**

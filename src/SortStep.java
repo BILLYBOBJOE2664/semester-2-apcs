@@ -50,12 +50,14 @@ public class SortStep{
       System.out.println("(4) Recursive mergesort");
       System.out.println("(5) Fill with Integers");
       System.out.println("(6) Fill with Strings");
+      System.out.println("(7) Slow sort");
       System.out.println("(Q) Quit");
       System.out.println();
       System.out.print("Choice ---> ");
       choice = console.next() + " ";
-      if ('1' <= choice.charAt(0) && choice.charAt(0) <= '6'){
+      if ('1' <= choice.charAt(0) && choice.charAt(0) <= '7'){
         System.out.println();
+        long startTime = System.currentTimeMillis();
 
         mySorts.setStepCount(0);
 
@@ -83,15 +85,21 @@ public class SortStep{
             case '6':
               listType = "String";
               break;
+            case '7':
+            	resetArray();
+            	int l = myArray.size() - 1;
+                mySorts.slowSort(myArray, 0, l);
               
         }
-        if ('1' <= choice.charAt(0) && choice.charAt(0) <= '4'){
+        if (('1' <= choice.charAt(0) && choice.charAt(0) <= '4') || choice.charAt(0) == '7'){
         	System.out.println();
         	System.out.println("Array sorted to:");
 	        screenOutput();
 	        System.out.println();
 	        System.out.println("# steps = " + mySorts.getStepCount());
 	        System.out.println();
+	        long endTime = System.currentTimeMillis();
+	        System.out.println("Time taken: " + (endTime - startTime) + "ms");
         }
       }
     } while (choice.charAt(0) != 'Q' && choice.charAt(0) != 'q');
@@ -116,8 +124,9 @@ public class SortStep{
     myArray = new ArrayList <Comparable>();
 
     for (int loop = 0; loop < numInts; loop++){
-      Integer x = new Integer(randGen.nextInt(largestInt) + 1);
-      myArray.add(x);
+      /*Integer x = new Integer(randGen.nextInt(largestInt) + 1);
+      myArray.add(x);*/
+    	myArray.add(largestInt - loop);
     }
   }
 
