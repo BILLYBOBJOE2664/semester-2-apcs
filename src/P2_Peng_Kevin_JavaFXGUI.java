@@ -1,5 +1,10 @@
 import javafx.application.Application;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -10,6 +15,7 @@ import javafx.scene.control.Slider;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Arc;
 import javafx.scene.shape.Circle;
@@ -30,6 +36,9 @@ public class P2_Peng_Kevin_JavaFXGUI extends Application {
 	
 	private ColorPicker bodyColorPicker;
 	private ColorPicker wheelColorPicker;
+	private Slider slider;
+	//place where the car is drawn
+	Group group;
 
 	public void start(Stage stage) throws Exception {
 		stage.setTitle("GUI");
@@ -38,35 +47,47 @@ public class P2_Peng_Kevin_JavaFXGUI extends Application {
 		stage.setScene(scene);
 		
 		HBox hBox = new HBox();
-		hBox.setPadding(new Insets(20, 20, 0, 20));
+		hBox.setPadding(new Insets(20, 20, 5, 20));
 		hBox.setSpacing(10);
-		Label label = new Label("Hello");
-		Button button = new Button("Button");
-		CheckBox checkbox = new CheckBox("I have read and agree to the terms");
-		hBox.getChildren().addAll(label, button, checkbox);
+		Button button = new Button("Reset");
+		button.setOnAction(new ButtonHandler());
+		hBox.getChildren().add(button);
 		root.setTop(hBox);
 		
-		Slider slider = new Slider(0, 100, 50);
+		slider = new Slider(0, 300, 50);
+		slider.setValue(200);
+		slider.valueProperty().addListener(new SliderHandler());
 		slider.setPadding(new Insets(10));
 		root.setBottom(slider);
 		
+		VBox bodyColorPickerBox = new VBox();
+		bodyColorPickerBox.setAlignment(Pos.TOP_CENTER);
+		Label bodyColorPickerLabel = new Label("Body Color");
 		bodyColorPicker = new ColorPicker(Color.RED);
-		root.setLeft(bodyColorPicker);
+		bodyColorPicker.valueProperty().addListener(new ColorHandler());
+		bodyColorPickerBox.getChildren().addAll(bodyColorPickerLabel, bodyColorPicker);
+		root.setLeft(bodyColorPickerBox);
 		
+		VBox wheelColorPickerBox = new VBox();
+		wheelColorPickerBox.setAlignment(Pos.TOP_CENTER);
+		Label wheelColorPickerLabel = new Label("Wheel Color");
 		wheelColorPicker = new ColorPicker(Color.BLACK);
-		root.setRight(wheelColorPicker);
+		wheelColorPicker.valueProperty().addListener(new ColorHandler());
+		wheelColorPickerBox.getChildren().addAll(wheelColorPickerLabel, wheelColorPicker);
+		root.setRight(wheelColorPickerBox);
 		
-		Group group = new Group();
-		Region region = new Region();
-		region.setMinSize(300, 300);
+		group = new Group();
 		drawCar(group, 200, bodyColorPicker.getValue(), wheelColorPicker.getValue());
-		group.getChildren().add(region);
 		root.setCenter(group);
 		
 		stage.show();
-	}
+		
+		
+		}
 	
 	private void drawCar(Group group, int carWidth, Color bodyColor, Color wheelColor){
+		group.getChildren().clear();
+		
 		int carHeight = carWidth/2;
 		int wheelRadius = carWidth/8;
 		int wheelOffsetX = carWidth/3;
@@ -76,35 +97,68 @@ public class P2_Peng_Kevin_JavaFXGUI extends Application {
 		
 		Color windowColor = Color.LIGHTBLUE;
 		
+		//set the size of the group
+		Region region = new Region();
+		region.setMinSize(carWidth + 30, carHeight/2 + wheelOffsetY + wheelRadius + 30);
+		group.getChildren().add(region);
+		
 		//bottom part
-		Rectangle bodyBottom = new Rectangle(group.prefWidth()/2 - CAR_WIDTH/2, group.getHeight()/2, CAR_WIDTH, CAR_HEIGHT/2);
-		bodyBottom.setFill(BODY_COLOR);
+		Rectangle bodyBottom = new Rectangle(group.prefWidth(-1)/2 - carWidth/2, group.prefHeight(-1)/2, carWidth, carHeight/2);
+		bodyBottom.setFill(bodyColor);
 		group.getChildren().add(bodyBottom);
 		
 		//top part
-		Arc bodyTop = new Arc(group.getWidth()/2 - CAR_WIDTH*0.125, group.getHeight()/2, CAR_WIDTH*0.375, CAR_HEIGHT/2, 0, 180);
-		bodyTop.setFill(BODY_COLOR);
+		Arc bodyTop = new Arc(group.prefWidth(-1)/2 - carWidth*0.125, group.prefHeight(-1)/2, carWidth*0.375, carHeight/2, 0, 180);
+		bodyTop.setFill(bodyColor);
 		group.getChildren().add(bodyTop);
 		
 		//window
-		Arc window = new Arc(group.getWidth()/2 - CAR_WIDTH*0.125, group.getHeight()/2, CAR_WIDTH*0.375 - WINDOW_OFFSET, CAR_HEIGHT/2 - WINDOW_OFFSET, 0, 180);
-		window.setFill(WINDOW_COLOR);
+		Arc window = new Arc(group.prefWidth(-1)/2 - carWidth*0.125, group.prefHeight(-1)/2, carWidth*0.375 - windowOffset, carHeight/2 - windowOffset, 0, 180);
+		window.setFill(windowColor);
 		group.getChildren().add(window);
 		
 		//seperate the front and back window
-		Rectangle windowSeperator = new Rectangle(group.getWidth()/2 - CAR_WIDTH*0.125 - WINDOW_SEPARATOR_WIDTH, group.getHeight()/2 - CAR_HEIGHT/2 + WINDOW_OFFSET/2, WINDOW_SEPARATOR_WIDTH, CAR_HEIGHT/2 - WINDOW_OFFSET/2);
-		windowSeperator.setFill(BODY_COLOR);
+		Rectangle windowSeperator = new Rectangle(group.prefWidth(-1)/2 - carWidth*0.125 - windowSeperatorWidth, group.prefHeight(-1)/2 - carHeight/2 + windowOffset/2, windowSeperatorWidth, carHeight/2 - windowOffset/2);
+		windowSeperator.setFill(bodyColor);
 		group.getChildren().add(windowSeperator);
 		
 		//left wheel
-		Circle wheelLeft = new Circle(group.getWidth()/2 - WHEEL_OFFSET_X, group.getHeight()/2 + WHEEL_OFFSET_Y, WHEEL_RADIUS);
-		wheelLeft.setFill(WHEEL_COLOR);
+		Circle wheelLeft = new Circle(group.prefWidth(-1)/2 - wheelOffsetX, group.prefHeight(-1)/2 + wheelOffsetY, wheelRadius);
+		wheelLeft.setFill(wheelColor);
 		group.getChildren().add(wheelLeft);
 		
 		//right wheel
-		Circle wheelRight = new Circle(group.getWidth()/2 + WHEEL_OFFSET_X, group.getHeight()/2 + WHEEL_OFFSET_Y, WHEEL_RADIUS);
-		wheelRight.setFill(WHEEL_COLOR);
+		Circle wheelRight = new Circle(group.prefWidth(-1)/2 + wheelOffsetX, group.prefHeight(-1)/2 + wheelOffsetY, wheelRadius);
+		wheelRight.setFill(wheelColor);
 		group.getChildren().add(wheelRight);
+		
+	}
+	
+	private class SliderHandler implements ChangeListener<Number>{
+
+		@Override
+		public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+			drawCar(group, (int)slider.getValue(), bodyColorPicker.getValue(), wheelColorPicker.getValue());
+		}
+		
+	}
+	
+	private class ColorHandler implements ChangeListener<Color>{
+
+		@Override
+		public void changed(ObservableValue<? extends Color> observable, Color oldValue, Color newValue) {
+			drawCar(group, (int)slider.getValue(), bodyColorPicker.getValue(), wheelColorPicker.getValue());
+		}
+	}
+	
+	private class ButtonHandler implements EventHandler<ActionEvent>{
+
+		@Override
+		public void handle(ActionEvent e) {
+			bodyColorPicker.setValue(Color.RED);
+			wheelColorPicker.setValue(Color.BLACK);
+			slider.setValue(200);
+		}
 		
 	}
 
