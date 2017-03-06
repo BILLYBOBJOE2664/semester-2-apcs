@@ -28,7 +28,7 @@ import javafx.stage.Stage;
  * Feb 28, 2017
  * took 20 minutes
  * 
- * I spent some time researching how to do anything before starting. I didn't really understand is insets overalpped at first but they don't. I couldn't find the right node type to take up space
+ * I spent some time researching how to do anything before starting. I didn't really understand is insets overlapped at first but they don't. I couldn't find the right node type to take up space
  * in the group initially.
  */
 
