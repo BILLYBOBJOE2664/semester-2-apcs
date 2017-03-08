@@ -8,25 +8,13 @@
  * I decided not do try to hard because the example wasn't in monospace either.
  */
 
+import java.util.ArrayList;
 import java.util.Scanner;
 import java.io.*;
 public class P2_Peng_Kevin_LifeModel extends GridModel<Boolean>{
-
-	//the main array that keeps track of all the cells. True is alive and false is dead
-	/*public static void main(String[] args) throws IOException{
-		P2_Peng_Kevin_Life test = new P2_Peng_Kevin_Life("life100.txt");
-		test.printBoard();
-		for(int i = 0; i < 150; i++){
-			test.nextGeneration();
-			test.printBoard();
-		}
-		//test.runLife(5);
-		//test.printBoard();
-		System.out.println("Number of liveing cells in row 9: " + test.rowCount(9));
-		System.out.println("Number of liveing cells in col 9: " + test.colCount(9));
-		System.out.println("Number of living cells: " + test.totalCount());
-	}*/
 	
+	ArrayList<GenerationListener> generationListeners;
+	int gen; //the current generation
 	/**
 	 * Creates a new grid using the file passed in
 	 * @param filename The name of the file containing the initial configuration
@@ -34,6 +22,7 @@ public class P2_Peng_Kevin_LifeModel extends GridModel<Boolean>{
 	 */
 	public P2_Peng_Kevin_LifeModel(Boolean[][] grid){
 		super(grid);
+		generationListeners = new ArrayList<GenerationListener>();
 	}
 	/**
 	 * Runs for a given number of generations
@@ -69,37 +58,40 @@ public class P2_Peng_Kevin_LifeModel extends GridModel<Boolean>{
 			}
 		}
 		setGrid(nextGrid);
+		setGeneration(getGeneration() + 1);
 	}
 	
 	/**
-	 * Prints out the board with row and column headers
+	 * returns a string representation of the board with row and column headers
 	 */
-	public void printBoard(){
+	public String toString(){
+		String str = "";
 		//length of the row markers
 		int length = (int) Math.log10(getNumRows()) + 1;
 		//print buffers before the column markers
 		for(int i = 0; i < length; i++){
-			System.out.print(" ");
+			str += " ";
 		}
 		//print column markers
 		for(int i = 0; i < getNumCols(); i++){
-			System.out.print(i);
+			str += ".";
 		}
-		System.out.println();
+		str += "\n";
 		//print each row
 		for(int i = 0; i < getNumRows(); i++){
 			//print row marker
-			System.out.printf("%" + length + "d", i);
+			str += String.format("%" + length + "d", i);
 			//print the cells
 			for(int k = 0; k < getNumCols(); k++){
 				if(getValueAt(i, k)){
-					System.out.print("*");
+					str += "*";
 				}else{
-					System.out.print(" ");
+					str += " ";
 				}
 			}
-			System.out.println();
+			str += "\n";
 		}
+		return str;
 	}
 	
 	/**
@@ -108,7 +100,7 @@ public class P2_Peng_Kevin_LifeModel extends GridModel<Boolean>{
 	 * @param column The column the cell is in
 	 * @return The number of living neighbors around the cell
 	 */
-	public int numNeighbors(int row, int column){
+	private int numNeighbors(int row, int column){
 		int num = 0;
 		for(int r = -1; r <= 1; r++){
 			for(int c = -1; c <= 1; c++){
@@ -119,5 +111,28 @@ public class P2_Peng_Kevin_LifeModel extends GridModel<Boolean>{
 			}
 		}
 		return num;
+	}
+	
+	public void addGenerationListener(GenerationListener l){
+		if(!generationListeners.contains(l)){
+			generationListeners.add(l);
+		}
+	}
+	
+	public void removeGenerationListener(GenerationListener l){
+		generationListeners.remove(l);
+	}
+	
+	public void setGeneration(int gen){
+		if(this.gen != gen){
+			for(GenerationListener l : generationListeners){
+				l.GenerationChanged(this.gen, gen);
+			}
+			this.gen = gen;
+		}
+	}
+	
+	public int getGeneration(){
+		return gen;
 	}
 }
