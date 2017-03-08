@@ -120,12 +120,12 @@ public class P2_Peng_Kevin_LifeGUI_1 extends Application implements GenerationLi
 	private void saveModel(File file){
 		try {
 			FileWriter fw = new FileWriter(file);
-			fw.write(model.getNumRows() + " " + model.getNumCols() + "\n");
+			fw.write(model.getNumRows() + " " + model.getNumCols() + "\r\n");
 			for(int r = 0; r < model.getNumRows(); r++){
 				for(int c = 0; c < model.getNumCols(); c++){
 					fw.write(model.getValueAt(r, c) ? "X" : "O");
 				}
-				fw.write("\n");
+				fw.write("\r\n");
 			}
 			fw.close();
 		} catch (IOException e) {
