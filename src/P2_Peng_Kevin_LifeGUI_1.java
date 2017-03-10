@@ -41,6 +41,7 @@ public class P2_Peng_Kevin_LifeGUI_1 extends Application implements GenerationLi
 	private Button nextGenerationBtn;
 	private Label generationL;
 	private Slider sizeSlider;
+	private ScrollPane scrollPane;
 	private BooleanGridPane gridPane;
 	private P2_Peng_Kevin_LifeModel model;
 	
@@ -50,19 +51,18 @@ public class P2_Peng_Kevin_LifeGUI_1 extends Application implements GenerationLi
 
 	@Override
 	public void start(Stage stage) throws Exception {
+		stage.setTitle("Grid Viewer");
+		BorderPane root = new BorderPane();
+		Scene scene = new Scene(root);
+		stage.setScene(scene);
+		
 		gridPane = new BooleanGridPane();
 		gridPane.setOnMousePressed(new MouseHandler());
 		gridPane.setOnMouseDragged(new MouseHandler());
 		model = new P2_Peng_Kevin_LifeModel(initializeArray(50, 50));
 		model.addGenerationListener(this);
 		gridPane.setModel(model);
-		ScrollPane scrollPane = new ScrollPane(gridPane);
-		
-		stage.setTitle("Grid Viewer");
-		BorderPane root = new BorderPane();
-		Scene scene = new Scene(root);
-		stage.setScene(scene);
-		
+		scrollPane = new ScrollPane(gridPane);
 		
 		root.setCenter(scrollPane);
 		
@@ -92,7 +92,28 @@ public class P2_Peng_Kevin_LifeGUI_1 extends Application implements GenerationLi
 		botBox.getChildren().addAll(generationL, clearBtn, nextGenerationBtn, sizeSlider);
 		root.setBottom(botBox);
 		
+		stage.widthProperty().addListener(new ChangeListener<Number>(){
+
+			@Override
+			public void changed(ObservableValue<? extends Number> obervable, Number oldVal, Number newVal) {
+				sizeGridPaneToScene();
+			}
+			
+		});
+		stage.widthProperty().addListener(new ChangeListener<Number>(){
+			@Override
+			public void changed(ObservableValue<? extends Number> obervable, Number oldVal, Number newVal) {
+				sizeGridPaneToScene();
+			}
+		});
+		stage.heightProperty().addListener(new ChangeListener<Number>(){
+			@Override
+			public void changed(ObservableValue<? extends Number> obervable, Number oldVal, Number newVal) {
+				sizeGridPaneToScene();
+			}
+		});
 		stage.show();
+
 	}
 	
 	private Boolean[][] readFile(File file){
@@ -150,6 +171,24 @@ public class P2_Peng_Kevin_LifeGUI_1 extends Application implements GenerationLi
 		return arr;
 	}
 	
+	private void loadGrid(Boolean[][] grid){
+		model = new P2_Peng_Kevin_LifeModel(grid);
+		gridPane.setModel(model);
+		model.setGeneration(0);
+		sizeGridPaneToScene();
+	}
+	/**
+	 * Changes the tileSize so the model fills all available space
+	 */
+	private void sizeGridPaneToScene(){
+		double width = scrollPane.getWidth();
+		double height = scrollPane.getHeight();
+		double tileWidth = width/model.getNumCols();
+		double tileHeight = height/model.getNumRows();
+		gridPane.setTileSize(Math.min(tileWidth, tileHeight));
+		sizeSlider.setValue(gridPane.getTileSize());
+	}
+	
 	private class ButtonHandler implements EventHandler<ActionEvent>{
 
 		@Override
@@ -161,10 +200,7 @@ public class P2_Peng_Kevin_LifeGUI_1 extends Application implements GenerationLi
 				fileChooser.getExtensionFilters().add(new ExtensionFilter("Text Files", "*.txt"));
 				File file = fileChooser.showOpenDialog(new Stage());
 				if(file != null){
-					model = new P2_Peng_Kevin_LifeModel(readFile(file));
-					gridPane.setModel(model);
-					gridPane.setTileSize(sizeSlider.getValue());
-					model.setGeneration(0);
+					loadGrid(readFile(file));
 				}
 			}else if(src == saveMenu){
 				FileChooser fileChooser = new FileChooser();
