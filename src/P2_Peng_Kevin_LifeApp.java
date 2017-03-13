@@ -39,7 +39,7 @@ import javafx.stage.Stage;
  * I didn't fix this. I also had to do some research to figure out how to detect doubleclicks.
  */
 
-public class P2_Peng_Kevin_LifeGUI_2 extends Application implements GenerationListener{
+public class P2_Peng_Kevin_LifeApp extends Application implements GenerationListener{
 	
 	private MenuItem loadMenu;
 	private MenuItem saveMenu;
