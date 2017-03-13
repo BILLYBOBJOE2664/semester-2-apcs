@@ -1,4 +1,3 @@
-import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
@@ -32,11 +31,15 @@ import javafx.stage.Stage;
 /**
  * Kevin Peng
  * Period 2
- * March 7, 2017
+ * March 12, 2017
+ * took 1 hour 30 minutes
  * 
+ * One problem I ran into was that I loaded a new grid by creating a new model and gridpane. This meant that my listeners were removed. I solved this
+ * by re adding the listeners. I also had the problem that the scrollpane scrollbars took up space so the model didn't completely fill the screen but
+ * I didn't fix this. I also had to do some research to figure out how to detect doubleclicks.
  */
 
-public class P2_Peng_Kevin_LifeGUI_1 extends Application implements GenerationListener{
+public class P2_Peng_Kevin_LifeGUI_2 extends Application implements GenerationListener{
 	
 	private MenuItem loadMenu;
 	private MenuItem saveMenu;
