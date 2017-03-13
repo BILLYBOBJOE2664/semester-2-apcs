@@ -173,8 +173,9 @@ public class P2_Peng_Kevin_LifeGUI_1 extends Application implements GenerationLi
 	
 	private void loadGrid(Boolean[][] grid){
 		model = new P2_Peng_Kevin_LifeModel(grid);
+		model.addGenerationListener(this);
 		gridPane.setModel(model);
-		model.setGeneration(0);
+		generationL.setText("Generation: 0");
 		sizeGridPaneToScene();
 	}
 	/**
