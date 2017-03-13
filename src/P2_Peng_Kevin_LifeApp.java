@@ -131,7 +131,7 @@ public class P2_Peng_Kevin_LifeApp extends Application implements GenerationList
 		
 		speedSlider = new Slider(0, 1000, 0);
 		speedSlider.setShowTickLabels(true);
-		sliderBox.getChildren().addAll(new Label("Size"), sizeSlider, new Label("Speed"), speedSlider);
+		sliderBox.getChildren().addAll(new Label("Size"), sizeSlider, new Label("Ms Between Ticks"), speedSlider);
 		
 		botBox.getChildren().addAll(buttonBox, sliderBox);
 		root.setBottom(botBox);
@@ -208,10 +208,8 @@ public class P2_Peng_Kevin_LifeApp extends Application implements GenerationList
 	}
 	
 	private void loadGrid(Boolean[][] grid){
-		model = new P2_Peng_Kevin_LifeModel(grid);
-		model.addGenerationListener(this);
-		gridPane.setModel(model);
-		generationL.setText("Generation: 0");
+		model.setGrid(grid);
+		model.setGeneration(0);
 		sizeGridPaneToScene();
 	}
 	/**
