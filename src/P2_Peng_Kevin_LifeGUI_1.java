@@ -5,6 +5,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Scanner;
 
+import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -19,9 +20,11 @@ import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Slider;
+import javafx.scene.control.ToggleButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
@@ -39,8 +42,10 @@ public class P2_Peng_Kevin_LifeGUI_1 extends Application implements GenerationLi
 	private MenuItem saveMenu;
 	private Button clearBtn;
 	private Button nextGenerationBtn;
+	private ToggleButton runToggle;
 	private Label generationL;
 	private Slider sizeSlider;
+	private Slider speedSlider;
 	private ScrollPane scrollPane;
 	private BooleanGridPane gridPane;
 	private P2_Peng_Kevin_LifeModel model;
@@ -51,6 +56,17 @@ public class P2_Peng_Kevin_LifeGUI_1 extends Application implements GenerationLi
 
 	@Override
 	public void start(Stage stage) throws Exception {
+		AnimationTimer runLife = new AnimationTimer(){
+			long lastTick = 0;
+			@Override
+			public void handle(long now) {
+				if(now - lastTick >= speedSlider.getValue()*1000000){
+					lastTick = now;
+					model.nextGeneration();
+				}
+			}
+		};
+		
 		stage.setTitle("Grid Viewer");
 		BorderPane root = new BorderPane();
 		Scene scene = new Scene(root);
@@ -63,7 +79,6 @@ public class P2_Peng_Kevin_LifeGUI_1 extends Application implements GenerationLi
 		model.addGenerationListener(this);
 		gridPane.setModel(model);
 		scrollPane = new ScrollPane(gridPane);
-		
 		root.setCenter(scrollPane);
 		
 		MenuBar menuBar = new MenuBar();
@@ -76,30 +91,48 @@ public class P2_Peng_Kevin_LifeGUI_1 extends Application implements GenerationLi
 		menuBar.getMenus().add(menu);
 		root.setTop(menuBar);
 		
-		HBox botBox = new HBox();
-		botBox.setPadding(new Insets(10, 10, 0, 10));
-		botBox.setSpacing(10);
+		VBox botBox = new VBox();
+		HBox buttonBox = new HBox();
+		buttonBox.setPadding(new Insets(5, 10, 0, 10));
+		buttonBox.setSpacing(10);
+
 		generationL = new Label("Generation: 0");
+		
 		clearBtn = new Button("Clear");
 		clearBtn.setOnAction(new ButtonHandler());
+		
 		nextGenerationBtn = new Button("Next Generation");
 		nextGenerationBtn.setOnAction(new ButtonHandler());
+		
+		runToggle = new ToggleButton("Run");
+		runToggle.selectedProperty().addListener(new ChangeListener<Boolean>(){
+			@Override
+			public void changed(ObservableValue<? extends Boolean> observable, Boolean oldVal, Boolean newVal) {
+				if(newVal){
+					runLife.start();
+				}else{
+					runLife.stop();
+				}
+			}
+		});
+		
+		buttonBox.getChildren().addAll(generationL, clearBtn, nextGenerationBtn, runToggle);
+				
+		HBox sliderBox = new HBox();
+		sliderBox.setPadding(new Insets(5, 10, 0, 10));
+		sliderBox.setSpacing(10);
 		sizeSlider = new Slider(0, 100, 50);
 		sizeSlider.setValue(gridPane.getTileSize());
 		sizeSlider.setShowTickLabels(true);
-		sizeSlider.setShowTickMarks(true);
 		sizeSlider.valueProperty().addListener(new SliderHandler());
-		botBox.getChildren().addAll(generationL, clearBtn, nextGenerationBtn, sizeSlider);
+		
+		speedSlider = new Slider(0, 1000, 0);
+		speedSlider.setShowTickLabels(true);
+		sliderBox.getChildren().addAll(new Label("Size"), sizeSlider, new Label("Speed"), speedSlider);
+		
+		botBox.getChildren().addAll(buttonBox, sliderBox);
 		root.setBottom(botBox);
 		
-		stage.widthProperty().addListener(new ChangeListener<Number>(){
-
-			@Override
-			public void changed(ObservableValue<? extends Number> obervable, Number oldVal, Number newVal) {
-				sizeGridPaneToScene();
-			}
-			
-		});
 		stage.widthProperty().addListener(new ChangeListener<Number>(){
 			@Override
 			public void changed(ObservableValue<? extends Number> obervable, Number oldVal, Number newVal) {
@@ -239,13 +272,34 @@ public class P2_Peng_Kevin_LifeGUI_1 extends Application implements GenerationLi
 		public void handle(MouseEvent e) {
 			int row = gridPane.rowForYPos(e.getY());
 			int col = gridPane.colForXPos(e.getX());
-			if(e.isPrimaryButtonDown()){
-				model.setValueAt(row, col, true);
-			}else if(e.isSecondaryButtonDown()){
-				model.setValueAt(row, col, false);
+			if(row >= 0 && row < model.getNumRows() && col >= 0 && col < model.getNumCols()){
+				if(e.isPrimaryButtonDown()){
+					if(e.getClickCount() == 1){
+						model.setValueAt(row, col, true);
+					}else if(e.getClickCount() == 2){
+						erase(row, col);
+					}
+				}else if(e.isSecondaryButtonDown()){
+					model.setValueAt(row, col, false);
+				}
 			}
 		}
 		
+	}
+	
+	/**
+	 * recursively deletes the block of live cells connected by an edge
+	 * @param r the row to start at
+	 * @param c the column to start at
+	 */
+	private void erase(int r, int c){
+		if(r >= 0 && r < model.getNumRows() && c >= 0 && c < model.getNumCols() && model.getValueAt(r, c)){
+			model.setValueAt(r, c, false);
+			erase(r - 1, c);
+			erase(r + 1, c);
+			erase(r, c - 1);
+			erase(r, c + 1);
+		}
 	}
 
 }
