@@ -4,7 +4,7 @@ import java.util.Random;
  * Kevin Peng
  * Period 2
  * Mar 16, 2017
- *
+ * Took 30 minutes
  * I didn't have to deal with bugs but the way I organized the model and interface made the whole thing awkward to code and redundant. If we jut had a reveal()
  * method instead of setReveal(), things would've been simpler. In the end, it still works so it doesn't really matter. The code to check all eight squares
  * around a given cell was also really tedious to writer.

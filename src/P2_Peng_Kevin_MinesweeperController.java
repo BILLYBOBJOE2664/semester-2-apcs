@@ -4,7 +4,7 @@ import java.util.Scanner;
  * Kevin Peng
  * Period 2
  * Mar 16, 2017
- *
+ * Took 40 minutes
  * I surprisingly ran into few problems. I incorrectly calculated the number of digits in the row/col incorrectly, and had to change the order so that
  * flags have a higher priority than unrevealed squares. I also move the win/loss check so that the board would be printed before the game lost.
  */
