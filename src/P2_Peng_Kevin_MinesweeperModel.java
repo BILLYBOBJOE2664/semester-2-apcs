@@ -82,9 +82,9 @@ public class P2_Peng_Kevin_MinesweeperModel implements P2_Peng_Kevin_MSModel {
 		return grid[row][col].isRevealed();
 	}
 
-	public void setRevealed(int row, int col, boolean isRevealed) {
-		if(isRevealed && !grid[row][col].isRevealed()){
-			grid[row][col].setRevealed(isRevealed);
+	public void reveal(int row, int col) {
+		if(!grid[row][col].isRevealed()){
+			grid[row][col].setRevealed(true);
 			if(isFirstReveal){
 				generateMines(numMines);
 				isFirstReveal = false;
@@ -94,29 +94,27 @@ public class P2_Peng_Kevin_MinesweeperModel implements P2_Peng_Kevin_MSModel {
 				//top row
 				if(row > 0){
 					//left
-					if(col > 0) setRevealed(row - 1, col - 1, true);
+					if(col > 0) reveal(row - 1, col - 1);
 					//center
-					setRevealed(row - 1, col, true);
+					reveal(row - 1, col);
 					//right
-					if(col < grid[0].length - 1) setRevealed(row - 1, col + 1, true);
+					if(col < grid[0].length - 1) reveal(row - 1, col + 1);
 				}
 				//center row
 				//left
-				if(col > 0) setRevealed(row, col - 1, true);
+				if(col > 0) reveal(row, col - 1);
 				//right
-				if(col < grid[0].length - 1) setRevealed(row, col + 1, true);
+				if(col < grid[0].length - 1) reveal(row, col + 1);
 				//bottom row
 				if(row < grid.length - 1){
 					//left
-					if(col > 0) setRevealed(row + 1, col - 1, true);
+					if(col > 0) reveal(row + 1, col - 1);
 					//center
-					setRevealed(row + 1, col, true);
+					reveal(row + 1, col);
 					//right
-					if(col < grid[0].length - 1) setRevealed(row + 1, col + 1, true);
+					if(col < grid[0].length - 1) reveal(row + 1, col + 1);
 				}
 			}
-		}else{
-			grid[row][col].setRevealed(isRevealed);
 		}
 	}
 
@@ -146,17 +144,14 @@ public class P2_Peng_Kevin_MinesweeperModel implements P2_Peng_Kevin_MSModel {
 	}
 
 	public boolean hasWon() {
-		if(numFlags == numMines){
-			for(int r = 0; r < getNumRows(); r++){
-				for(int c = 0; c < getNumCols(); c++){
-					if(grid[r][c].isMine() && !grid[r][c].isFlagged()){
-						return false;
-					}
+		for(int r = 0; r < getNumRows(); r++){
+			for(int c = 0; c < getNumCols(); c++){
+				if(!grid[r][c].isMine() && !grid[r][c].isRevealed()){
+					return false;
 				}
 			}
-			return true;
 		}
-		return false;
+		return true;
 	}
 
 	public boolean hasLost() {
@@ -215,6 +210,4 @@ public class P2_Peng_Kevin_MinesweeperModel implements P2_Peng_Kevin_MSModel {
 			}
 		}
 	}
-
-	
 }
