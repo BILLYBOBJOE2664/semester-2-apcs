@@ -16,7 +16,7 @@ public class P2_Peng_Kevin_MinesweeperController {
 	public static void main(String[] args) {
 		Scanner scanner = new Scanner(System.in);
 		while(true){
-			play(10, 10, 10);
+			play(15, 15, 10);
 			System.out.println("Want to play again? (Enter \"y\" or \"n\"");
 			if(scanner.next().equals("n")) break;
 		}
@@ -78,7 +78,7 @@ public class P2_Peng_Kevin_MinesweeperController {
 		//print the row with row headers
 		for(int r = 0; r < grid.getNumRows(); r++){
 			//hidden board
-			System.out.printf("%-" + rowDigits + "d", r);
+			System.out.printf("%" + rowDigits + "d", r);
 			for(int c = 0; c < grid.getNumCols(); c++){
 				if (grid.isFlagged(r, c)){
 					System.out.printf("%-" + colDigits + "s", "!");
@@ -93,7 +93,7 @@ public class P2_Peng_Kevin_MinesweeperController {
 			
 			//revealed board
 			System.out.printf("%5s", "");
-			System.out.printf("%-" + rowDigits + "d", r);
+			System.out.printf("%" + rowDigits + "d", r);
 			for(int c = 0; c < grid.getNumCols(); c++){
 				if(grid.isMine(r, c)){
 					System.out.printf("%-" + colDigits + "s", "*");
