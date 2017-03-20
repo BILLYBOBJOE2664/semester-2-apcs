@@ -7,7 +7,8 @@ import java.util.Random;
  * Took 30 minutes
  * I didn't have to deal with bugs but the way I organized the model and interface made the whole thing awkward to code and redundant. If we jut had a reveal()
  * method instead of setReveal(), things would've been simpler. In the end, it still works so it doesn't really matter. The code to check all eight squares
- * around a given cell was also really tedious to writer.
+ * around a given cell was also really tedious to writer. I initially coded hasWon() to check if all the mines have been flagged and that there were no extra
+ * mines but I later found out that it was supposed to check if all non mines have been revealed so I changed it.
  */
 
 public class P2_Peng_Kevin_MinesweeperModel implements P2_Peng_Kevin_MSModel {
@@ -36,9 +37,9 @@ public class P2_Peng_Kevin_MinesweeperModel implements P2_Peng_Kevin_MSModel {
 		Random rand = new Random();
 		for(int i = 0; i < numMines; i++){
 			while(true){
-				int r = rand.nextInt(grid.length);
-				int c = rand.nextInt(grid[0].length);
-				if(!grid[r][c].isMine() && !grid[r][c].isRevealed()){
+				int r = rand.nextInt(getNumRows());
+				int c = rand.nextInt(getNumCols());
+				if(!isMine(r, c) && !isRevealed(r, c)){
 					grid[r][c].setIsMine(true);
 					break;
 				}
@@ -51,25 +52,25 @@ public class P2_Peng_Kevin_MinesweeperModel implements P2_Peng_Kevin_MSModel {
 		//top row
 		if(row > 0){
 			//left
-			if(col > 0 && grid[row - 1][col - 1].isMine()) sum++;
+			if(col > 0 && isMine(row - 1, col - 1)) sum++;
 			//center
-			if(grid[row - 1][col].isMine()) sum++;
+			if(isMine(row - 1, col)) sum++;
 			//right
-			if(col < grid[0].length - 1 && grid[row - 1][col + 1].isMine()) sum++;
+			if(col < getNumCols() - 1 && isMine(row - 1, col + 1)) sum++;
 		}
 		//center row
 		//left
-		if(col > 0 && grid[row][col - 1].isMine()) sum++;
+		if(col > 0 && isMine(row , col - 1)) sum++;
 		//right
-		if(col < grid[0].length - 1 && grid[row][col + 1].isMine()) sum++;
+		if(col < getNumCols() - 1 && isMine(row, col + 1)) sum++;
 		//bottom row
-		if(row < grid.length - 1){
+		if(row < getNumRows() - 1){
 			//left
-			if(col > 0 && grid[row + 1][col - 1].isMine()) sum++;
+			if(col > 0 && isMine(row + 1, col - 1)) sum++;
 			//center
-			if(grid[row + 1][col].isMine()) sum++;
+			if(isMine(row + 1, col)) sum++;
 			//right
-			if(col < grid[0].length - 1 && grid[row + 1][col + 1].isMine()) sum++;
+			if(col < getNumCols() - 1 && isMine(row + 1, col + 1)) sum++;
 		}
 		return sum;
 	}
@@ -83,7 +84,7 @@ public class P2_Peng_Kevin_MinesweeperModel implements P2_Peng_Kevin_MSModel {
 	}
 
 	public void reveal(int row, int col) {
-		if(!grid[row][col].isRevealed()){
+		if(!isRevealed(row, col)){
 			grid[row][col].setRevealed(true);
 			if(isFirstReveal){
 				generateMines(numMines);
@@ -98,21 +99,21 @@ public class P2_Peng_Kevin_MinesweeperModel implements P2_Peng_Kevin_MSModel {
 					//center
 					reveal(row - 1, col);
 					//right
-					if(col < grid[0].length - 1) reveal(row - 1, col + 1);
+					if(col < getNumCols() - 1) reveal(row - 1, col + 1);
 				}
 				//center row
 				//left
 				if(col > 0) reveal(row, col - 1);
 				//right
-				if(col < grid[0].length - 1) reveal(row, col + 1);
+				if(col < getNumCols() - 1) reveal(row, col + 1);
 				//bottom row
-				if(row < grid.length - 1){
+				if(row < getNumRows() - 1){
 					//left
 					if(col > 0) reveal(row + 1, col - 1);
 					//center
 					reveal(row + 1, col);
 					//right
-					if(col < grid[0].length - 1) reveal(row + 1, col + 1);
+					if(col < getNumCols() - 1) reveal(row + 1, col + 1);
 				}
 			}
 		}
@@ -123,9 +124,9 @@ public class P2_Peng_Kevin_MinesweeperModel implements P2_Peng_Kevin_MSModel {
 	}
 
 	public void setFlagged(int row, int col, boolean isFlagged) {
-		if(!grid[row][col].isFlagged() && isFlagged){
+		if(!isFlagged(row, col) && isFlagged){
 			numFlags++;
-		}else if(grid[row][col].isFlagged() && !isFlagged){
+		}else if(isFlagged(row, col) && !isFlagged){
 			numFlags--;
 		}
 		grid[row][col].setFlagged(isFlagged);
@@ -146,7 +147,7 @@ public class P2_Peng_Kevin_MinesweeperModel implements P2_Peng_Kevin_MSModel {
 	public boolean hasWon() {
 		for(int r = 0; r < getNumRows(); r++){
 			for(int c = 0; c < getNumCols(); c++){
-				if(!grid[r][c].isMine() && !grid[r][c].isRevealed()){
+				if(!isMine(r, c) && !isRevealed(r, c)){
 					return false;
 				}
 			}
@@ -157,7 +158,7 @@ public class P2_Peng_Kevin_MinesweeperModel implements P2_Peng_Kevin_MSModel {
 	public boolean hasLost() {
 		for(int r = 0; r < getNumRows(); r++){
 			for(int c = 0; c < getNumCols(); c++){
-				if(grid[r][c].isMine() && grid[r][c].isRevealed()){
+				if(isMine(r, c) && isRevealed(r, c)){
 					return true;
 				}
 			}

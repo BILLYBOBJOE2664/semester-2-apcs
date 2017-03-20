@@ -25,7 +25,7 @@ public class P2_Peng_Kevin_MinesweeperController {
 	
 	private static void play(int width, int height, int numMines){
 		Scanner scanner = new Scanner(System.in);
-		P2_Saha_Siddharth_MinesweeperModel grid = new P2_Saha_Siddharth_MinesweeperModel(width, height, numMines);
+		P2_Peng_Kevin_MinesweeperModel grid = new P2_Peng_Kevin_MinesweeperModel(width, height, numMines);
 		while(true){
 			printBoard(grid);
 			if(grid.hasWon()){
@@ -51,7 +51,7 @@ public class P2_Peng_Kevin_MinesweeperController {
 			if(row >= 0 && row < grid.getNumRows() && col >= 0 && col < grid.getNumCols()){
 				if(command.equals("f") && !grid.isRevealed(row, col)){
 					grid.setFlagged(row, col, !grid.isFlagged(row, col));
-				}else if(command.equals("r")){
+				}else if(command.equals("r") && !grid.isFlagged(row, col)){
 					grid.reveal(row, col);
 				}else{
 					System.out.println("Invalid command");
