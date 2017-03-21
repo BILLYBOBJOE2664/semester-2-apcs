@@ -7,12 +7,12 @@ import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
@@ -76,13 +76,14 @@ public class P2_Peng_Kevin_MinesweeperGUI extends Application{
 		
 		P2_Peng_Kevin_MinesweeperModel grid = new P2_Peng_Kevin_MinesweeperModel(10, 10, 10);
 		P2_Peng_Kevin_MinesweeperGridPane gridPane = new P2_Peng_Kevin_MinesweeperGridPane(grid);
+		grid.addListener(gridPane);
 		gridPane.setOnMouseClicked(new EventHandler<MouseEvent>(){
-
+			private boolean isRunning = true;
+			
 			public void handle(MouseEvent e) {
-				//TODO broken and inelegant
-				for(Node node : gridPane.getChildren()){
-					if(node.contains(e.getX(), e.getY())){
-						System.out.println("Revealed");
+				if(isRunning){
+					ImageView node = gridPane.getNodeFromXY(e.getX(), e.getY());
+					if(node != null){
 						int row = GridPane.getRowIndex(node);
 						int col = GridPane.getColumnIndex(node);
 						if(e.getButton() == MouseButton.PRIMARY && !grid.isFlagged(row, col)){
@@ -90,14 +91,15 @@ public class P2_Peng_Kevin_MinesweeperGUI extends Application{
 						}else if(e.getButton() == MouseButton.SECONDARY && !grid.isRevealed(row, col)){
 							grid.setFlagged(row, col, !grid.isFlagged(row, col));
 						}
-						gridPane.resetCells();
-						break;
+						if(grid.hasWon()){
+							System.out.println("You Win!");
+							isRunning = false;
+						}else if(grid.hasLost()){
+							System.out.println("You Lose!");
+							isRunning = false;
+							
+						}
 					}
-				}
-				if(grid.hasWon()){
-					System.out.println("You Win!");
-				}else if(grid.hasLost()){
-					System.out.println("You Lose!");
 				}
 			}
 			

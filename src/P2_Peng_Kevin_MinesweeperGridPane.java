@@ -1,5 +1,7 @@
+import javafx.scene.Node;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseButton;
 import javafx.scene.layout.GridPane;
 
 /**
@@ -14,7 +16,7 @@ import javafx.scene.layout.GridPane;
  * @author kpeng356
  *
  */
-public class P2_Peng_Kevin_MinesweeperGridPane extends GridPane{
+public class P2_Peng_Kevin_MinesweeperGridPane extends GridPane implements P2_Peng_Kevin_MSModelListener{
 	private P2_Peng_Kevin_MinesweeperModel model;
 	private Image blank;
 	private Image bombDeath;
@@ -54,7 +56,56 @@ public class P2_Peng_Kevin_MinesweeperGridPane extends GridPane{
 		num8 = new Image("file:minesweeper/images/num_8.gif");
 	}
 	
+	public ImageView getNodeFromRowCol(int row, int col){
+		for(Node node : getChildren()){
+			if(GridPane.getRowIndex(node) == row && GridPane.getColumnIndex(node) == col){
+				return (ImageView) node;
+			}
+		}
+		return null;
+	}
+	
+	public ImageView getNodeFromXY(double x, double y){
+		for(Node node : getChildren()){
+			if(node.getBoundsInParent().contains(x, y)){
+				return (ImageView) node;
+			}
+		}
+		return null;
+	}
+	
+	public void updateNode(ImageView node){
+		int r = GridPane.getRowIndex(node);
+		int c = GridPane.getColumnIndex(node);
+		if(model.isFlagged(r, c)){
+			node.setImage(bombFlagged);
+		}else if(!model.isRevealed(r, c)){
+			node.setImage(blank);
+		}else if(model.isMine(r, c)){
+			node.setImage(bombRevealed);
+		}else if(model.getNumNeighborMines(r, c) == 0){
+			node.setImage(num0);
+		}else if(model.getNumNeighborMines(r, c) == 1){
+			node.setImage(num1);
+		}else if(model.getNumNeighborMines(r, c) == 2){
+			node.setImage(num2);
+		}else if(model.getNumNeighborMines(r, c) == 3){
+			node.setImage(num3);
+		}else if(model.getNumNeighborMines(r, c) == 4){
+			node.setImage(num4);
+		}else if(model.getNumNeighborMines(r, c) == 5){
+			node.setImage(num5);
+		}else if(model.getNumNeighborMines(r, c) == 6){
+			node.setImage(num6);
+		}else if(model.getNumNeighborMines(r, c) == 7){
+			node.setImage(num7);
+		}else if(model.getNumNeighborMines(r, c) == 8){
+			node.setImage(num8);
+		}
+	}
+	
 	public void resetCells(){
+		getChildren().clear();
 		for(int r = 0; r < model.getNumRows(); r++){
 			for(int c = 0; c < model.getNumCols(); c++){
 				if(model.isFlagged(r, c)){
@@ -84,5 +135,13 @@ public class P2_Peng_Kevin_MinesweeperGridPane extends GridPane{
 				}
 			}
 		}
+	}
+
+	public void cellChanged(int row, int col) {
+		updateNode(getNodeFromRowCol(row, col));
+	}
+
+	public void modelChanged() {
+		resetCells();
 	}
 }

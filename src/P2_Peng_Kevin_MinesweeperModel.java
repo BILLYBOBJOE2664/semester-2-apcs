@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.Random;
 
 /**
@@ -16,9 +17,21 @@ public class P2_Peng_Kevin_MinesweeperModel implements P2_Peng_Kevin_MSModel {
 	private int numMines;
 	private boolean isFirstReveal;
 	private int numFlags;
+	private ArrayList<P2_Peng_Kevin_MSModelListener> listeners;
 	
 	public P2_Peng_Kevin_MinesweeperModel(int width, int height, int numMines){
+		listeners = new ArrayList<>();
 		createGrid(width, height, numMines);
+	}
+	
+	public void addListener(P2_Peng_Kevin_MSModelListener listener){
+		if(!listeners.contains(listener)){
+			listeners.add(listener);
+		}
+	}
+	
+	public void removeListener(P2_Peng_Kevin_MSModelListener listener){
+		listeners.remove(listener);
 	}
 	
 	public void createGrid(int width, int height, int numMines) {
@@ -31,6 +44,9 @@ public class P2_Peng_Kevin_MinesweeperModel implements P2_Peng_Kevin_MSModel {
 		this.numMines = numMines;
 		isFirstReveal = true;
 		numFlags = 0;
+		for(P2_Peng_Kevin_MSModelListener l : listeners){
+			l.modelChanged();
+		}
 	}
 
 	private void generateMines(int numMines) {
@@ -41,6 +57,9 @@ public class P2_Peng_Kevin_MinesweeperModel implements P2_Peng_Kevin_MSModel {
 				int c = rand.nextInt(getNumCols());
 				if(!isMine(r, c) && !isRevealed(r, c)){
 					grid[r][c].setIsMine(true);
+					for(P2_Peng_Kevin_MSModelListener l : listeners){
+						l.cellChanged(r, c);
+					}
 					break;
 				}
 			}
@@ -90,6 +109,9 @@ public class P2_Peng_Kevin_MinesweeperModel implements P2_Peng_Kevin_MSModel {
 				generateMines(numMines);
 				isFirstReveal = false;
 			}
+			for(P2_Peng_Kevin_MSModelListener l : listeners){
+				l.cellChanged(row, col);
+			}
 			//recursively reveal
 			if(!isMine(row, col) && getNumNeighborMines(row, col) == 0){
 				//top row
@@ -126,8 +148,14 @@ public class P2_Peng_Kevin_MinesweeperModel implements P2_Peng_Kevin_MSModel {
 	public void setFlagged(int row, int col, boolean isFlagged) {
 		if(!isFlagged(row, col) && isFlagged){
 			numFlags++;
+			for(P2_Peng_Kevin_MSModelListener l : listeners){
+				l.cellChanged(row, col);
+			}
 		}else if(isFlagged(row, col) && !isFlagged){
 			numFlags--;
+			for(P2_Peng_Kevin_MSModelListener l : listeners){
+				l.cellChanged(row, col);
+			}
 		}
 		grid[row][col].setFlagged(isFlagged);
 	}
