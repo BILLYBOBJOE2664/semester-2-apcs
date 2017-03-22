@@ -148,16 +148,17 @@ public class P2_Peng_Kevin_MinesweeperModel implements P2_Peng_Kevin_MSModel {
 	public void setFlagged(int row, int col, boolean isFlagged) {
 		if(!isFlagged(row, col) && isFlagged){
 			numFlags++;
+			grid[row][col].setFlagged(isFlagged);
 			for(P2_Peng_Kevin_MSModelListener l : listeners){
 				l.cellChanged(row, col);
 			}
 		}else if(isFlagged(row, col) && !isFlagged){
 			numFlags--;
+			grid[row][col].setFlagged(isFlagged);
 			for(P2_Peng_Kevin_MSModelListener l : listeners){
 				l.cellChanged(row, col);
 			}
 		}
-		grid[row][col].setFlagged(isFlagged);
 	}
 
 	public int getNumRows() {
