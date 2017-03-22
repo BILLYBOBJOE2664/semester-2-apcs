@@ -1,3 +1,4 @@
+import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -34,7 +35,10 @@ public class P2_Peng_Kevin_MinesweeperGUI extends Application implements P2_Peng
 	private boolean isRunning;
 	
 	private Label minesLeft;
-	private Label timeLeft;
+	private Label time;
+	
+	private AnimationTimer timer;
+	private long startTime; //when the timer started ticking
 	
 	private P2_Peng_Kevin_MinesweeperModel grid;
 	private P2_Peng_Kevin_MinesweeperGridPane gridPane;
@@ -66,6 +70,8 @@ public class P2_Peng_Kevin_MinesweeperGUI extends Application implements P2_Peng
 	@Override
 	public void start(Stage stage) throws Exception {
 		loadImages();
+		grid = new P2_Peng_Kevin_MinesweeperModel(10, 10, 10);
+		grid.addListeners(this);
 		
 		stage.setTitle("Minesweeper");
 		BorderPane root = new BorderPane();
@@ -74,16 +80,28 @@ public class P2_Peng_Kevin_MinesweeperGUI extends Application implements P2_Peng
 		
 		makeGUI(root);
 		
+		resetTimer();
+		timer = new AnimationTimer(){
+
+			public void handle(long now) {
+				if(startTime == -1){
+					startTime = now;
+				}
+				time.setText("Time: " + (now - startTime)/1000000000);
+			}
+			
+		};
+		
 		face = new ImageView(faceSmile);
 		
-		grid = new P2_Peng_Kevin_MinesweeperModel(10, 10, 10);
-		grid.addListeners(this);
+		
+		
 		gridPane = new P2_Peng_Kevin_MinesweeperGridPane(grid.getNumRows(), grid.getNumCols());
 		updateAll();
 		isRunning = true;
 		gridPane.setOnMousePressed(new EventHandler<MouseEvent>(){
 			@Override
-			public void handle(MouseEvent arg0) {
+			public void handle(MouseEvent e) {
 				if(isRunning){
 					face.setImage(faceOoh);
 				}
@@ -94,6 +112,8 @@ public class P2_Peng_Kevin_MinesweeperGUI extends Application implements P2_Peng
 			
 			public void handle(MouseEvent e) {
 				if(isRunning){
+					timer.start();
+					
 					face.setImage(faceSmile);
 					ImageView node = gridPane.getNodeFromXY(e.getX(), e.getY());
 					if(node != null){
@@ -105,11 +125,9 @@ public class P2_Peng_Kevin_MinesweeperGUI extends Application implements P2_Peng
 							grid.setFlagged(row, col, !grid.isFlagged(row, col));
 						}
 						if(grid.hasWon()){
-							System.out.println("You Win!");
 							displayWon();
 							isRunning = false;
 						}else if(grid.hasLost()){
-							System.out.println("You Lose!");
 							displayLost(row, col);
 							isRunning = false;
 							
@@ -135,7 +153,7 @@ public class P2_Peng_Kevin_MinesweeperGUI extends Application implements P2_Peng
 	 * @param row The row the of the mine that was revealed
 	 * @param col The column of the mine that was revealed
 	 */
-	public void displayLost(int row, int col){
+	private void displayLost(int row, int col){
 		for(int r = 0; r < grid.getNumRows(); r++){
 			for(int c = 0; c < grid.getNumCols(); c++){
 				if(grid.isMine(r, c) && !grid.isRevealed(r, c) && !grid.isFlagged(r, c)){
@@ -147,12 +165,13 @@ public class P2_Peng_Kevin_MinesweeperGUI extends Application implements P2_Peng
 		}
 		gridPane.setImageRowCol(row, col, bombDeath);
 		face.setImage(faceDead);
+		timer.stop();
 	}
 	
 	/**
 	 * Flag all unflagged mines
 	 */
-	public void displayWon(){
+	private void displayWon(){
 		for(int r = 0; r < grid.getNumRows(); r++){
 			for(int c = 0; c < grid.getNumCols(); c++){
 				if(grid.isMine(r, c) && !grid.isFlagged(r, c)){
@@ -161,9 +180,15 @@ public class P2_Peng_Kevin_MinesweeperGUI extends Application implements P2_Peng
 			}
 		}
 		face.setImage(faceWin);
+		timer.stop();
 	}
 	
-	public void updateAll(){
+	private void resetTimer(){
+		startTime = -1;
+		time.setText("Time: 0");
+	}
+	
+	private void updateAll(){
 		for(int r = 0; r < grid.getNumRows(); r++){
 			for(int c = 0; c < grid.getNumCols(); c++){
 				updateNode(r, c);
@@ -171,7 +196,7 @@ public class P2_Peng_Kevin_MinesweeperGUI extends Application implements P2_Peng
 		}
 	}
 	
-	public void updateNode(int row, int col){
+	private void updateNode(int row, int col){
 		if(grid.isFlagged(row, col)){
 			gridPane.setImageRowCol(row, col, bombFlagged);
 		}else if(!grid.isRevealed(row, col)){
@@ -200,9 +225,9 @@ public class P2_Peng_Kevin_MinesweeperGUI extends Application implements P2_Peng
 	}
 	
 	private void makeGUI(BorderPane root){
-		minesLeft = new Label("Mines Left: 0");
-		timeLeft = new Label("Time Left: 0");
-		HBox labelBox = new HBox(minesLeft, timeLeft);
+		minesLeft = new Label("Mines Left: " + grid.getNumMinesLeft());
+		time = new Label("Time: 0");
+		HBox labelBox = new HBox(minesLeft, time);
 		labelBox.setSpacing(10);
 		labelBox.setPadding(new Insets(5));
 		
@@ -257,6 +282,7 @@ public class P2_Peng_Kevin_MinesweeperGUI extends Application implements P2_Peng
 	@Override
 	public void cellChanged(int row, int col) {
 		updateNode(row, col);
+		minesLeft.setText("Mines Left: " + grid.getNumMinesLeft());
 	}
 
 	@Override

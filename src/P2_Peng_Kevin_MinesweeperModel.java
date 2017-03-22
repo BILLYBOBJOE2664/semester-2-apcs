@@ -16,7 +16,6 @@ public class P2_Peng_Kevin_MinesweeperModel implements P2_Peng_Kevin_MSModel {
 	private Cell[][] grid;
 	private int numMines;
 	private boolean isFirstReveal;
-	private int numFlags;
 	private ArrayList<P2_Peng_Kevin_MSModelListener> listeners;
 	
 	public P2_Peng_Kevin_MinesweeperModel(int width, int height, int numMines){
@@ -42,7 +41,6 @@ public class P2_Peng_Kevin_MinesweeperModel implements P2_Peng_Kevin_MSModel {
 		}
 		this.numMines = numMines;
 		isFirstReveal = true;
-		numFlags = 0;
 		for(P2_Peng_Kevin_MSModelListener l : listeners){
 			l.modelChanged();
 		}
@@ -146,13 +144,11 @@ public class P2_Peng_Kevin_MinesweeperModel implements P2_Peng_Kevin_MSModel {
 
 	public void setFlagged(int row, int col, boolean isFlagged) {
 		if(!isFlagged(row, col) && isFlagged){
-			numFlags++;
 			grid[row][col].setFlagged(isFlagged);
 			for(P2_Peng_Kevin_MSModelListener l : listeners){
 				l.cellChanged(row, col);
 			}
 		}else if(isFlagged(row, col) && !isFlagged){
-			numFlags--;
 			grid[row][col].setFlagged(isFlagged);
 			for(P2_Peng_Kevin_MSModelListener l : listeners){
 				l.cellChanged(row, col);
@@ -169,6 +165,14 @@ public class P2_Peng_Kevin_MinesweeperModel implements P2_Peng_Kevin_MSModel {
 	}
 
 	public int getNumMinesLeft() {
+		int numFlags = 0;
+		for(int r = 0; r < getNumRows(); r++){
+			for(int c = 0; c < getNumCols(); c++){
+				if(isFlagged(r, c)){
+					numFlags++;
+				}
+			}
+		}
 		return numMines - numFlags;
 	}
 
