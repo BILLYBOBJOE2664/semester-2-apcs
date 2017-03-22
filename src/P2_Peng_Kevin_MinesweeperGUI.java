@@ -1,6 +1,7 @@
 import javafx.application.Application;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
+import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
@@ -36,13 +37,18 @@ public class P2_Peng_Kevin_MinesweeperGUI extends Application implements P2_Peng
 	private Label timeLeft;
 	
 	private P2_Peng_Kevin_MinesweeperModel grid;
-	P2_Peng_Kevin_MinesweeperGridPane gridPane;
+	private P2_Peng_Kevin_MinesweeperGridPane gridPane;
+	private ImageView face;
 	
 	private Image blank;
 	private Image bombDeath;
 	private Image bombFlagged;
 	private Image bombRevealed;
 	private Image bombWrong;
+	private Image faceDead;
+	private Image faceOoh;
+	private Image faceSmile;
+	private Image faceWin;
 	private Image num0;
 	private Image num1;
 	private Image num2;
@@ -68,16 +74,27 @@ public class P2_Peng_Kevin_MinesweeperGUI extends Application implements P2_Peng
 		
 		makeGUI(root);
 		
+		face = new ImageView(faceSmile);
 		
 		grid = new P2_Peng_Kevin_MinesweeperModel(10, 10, 10);
 		grid.addListeners(this);
 		gridPane = new P2_Peng_Kevin_MinesweeperGridPane(grid.getNumRows(), grid.getNumCols());
 		updateAll();
 		isRunning = true;
+		gridPane.setOnMousePressed(new EventHandler<MouseEvent>(){
+			@Override
+			public void handle(MouseEvent arg0) {
+				if(isRunning){
+					face.setImage(faceOoh);
+				}
+			}
+			
+		});
 		gridPane.setOnMouseClicked(new EventHandler<MouseEvent>(){
 			
 			public void handle(MouseEvent e) {
 				if(isRunning){
+					face.setImage(faceSmile);
 					ImageView node = gridPane.getNodeFromXY(e.getX(), e.getY());
 					if(node != null){
 						int row = GridPane.getRowIndex(node);
@@ -102,7 +119,13 @@ public class P2_Peng_Kevin_MinesweeperGUI extends Application implements P2_Peng
 			}
 			
 		});
-		root.setCenter(gridPane);
+		Group group = new Group();
+		face.setX(gridPane.prefWidth(-1)/2 - face.prefWidth(-1)/2);
+		face.setY(0);
+		gridPane.setLayoutX(0);
+		gridPane.setLayoutY(face.prefHeight(-1));
+		group.getChildren().addAll(face, gridPane);
+		root.setCenter(group);
 		
 		stage.show();
 	}
@@ -123,6 +146,7 @@ public class P2_Peng_Kevin_MinesweeperGUI extends Application implements P2_Peng
 			}
 		}
 		gridPane.setImageRowCol(row, col, bombDeath);
+		face.setImage(faceDead);
 	}
 	
 	/**
@@ -136,6 +160,7 @@ public class P2_Peng_Kevin_MinesweeperGUI extends Application implements P2_Peng
 				}
 			}
 		}
+		face.setImage(faceWin);
 	}
 	
 	public void updateAll(){
@@ -213,6 +238,10 @@ public class P2_Peng_Kevin_MinesweeperGUI extends Application implements P2_Peng
 		bombFlagged = new Image("file:minesweeper/images/bomb_flagged.gif");
 		bombRevealed = new Image("file:minesweeper/images/bomb_revealed.gif");
 		bombWrong = new Image("file:minesweeper/images/bomb_wrong.gif");
+		faceDead = new Image("file:minesweeper/images/face_dead.gif");
+		faceOoh = new Image("file:minesweeper/images/face_ooh.gif");
+		faceSmile = new Image("file:minesweeper/images/face_smile.gif");
+		faceWin = new Image("file:minesweeper/images/face_win.gif");
 		num0 = new Image("file:minesweeper/images/num_0.gif");
 		num1 = new Image("file:minesweeper/images/num_1.gif");
 		num2 = new Image("file:minesweeper/images/num_2.gif");
@@ -223,6 +252,7 @@ public class P2_Peng_Kevin_MinesweeperGUI extends Application implements P2_Peng
 		num7 = new Image("file:minesweeper/images/num_7.gif");
 		num8 = new Image("file:minesweeper/images/num_8.gif");
 	}
+	
 
 	@Override
 	public void cellChanged(int row, int col) {
