@@ -24,16 +24,15 @@ public class P2_Peng_Kevin_MinesweeperModel implements P2_Peng_Kevin_MSModel {
 		createGrid(width, height, numMines);
 	}
 	
-	public void addListener(P2_Peng_Kevin_MSModelListener listener){
-		if(!listeners.contains(listener)){
-			listeners.add(listener);
+	public void addListeners(P2_Peng_Kevin_MSModelListener l){
+		if(!listeners.contains(l)){
+			listeners.add(l);
 		}
 	}
 	
-	public void removeListener(P2_Peng_Kevin_MSModelListener listener){
-		listeners.remove(listener);
+	public void removeListeners(P2_Peng_Kevin_MSModelListener l){
+		listeners.remove(l);
 	}
-	
 	public void createGrid(int width, int height, int numMines) {
 		grid = new Cell[height][width];
 		for(int r = 0; r < height; r++){
