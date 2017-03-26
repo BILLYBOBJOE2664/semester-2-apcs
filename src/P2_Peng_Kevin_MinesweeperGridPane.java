@@ -17,34 +17,47 @@ import javafx.scene.layout.GridPane;
  *
  */
 public class P2_Peng_Kevin_MinesweeperGridPane extends GridPane{
-	private ImageView[][] nodes;
 	
 	
-	public P2_Peng_Kevin_MinesweeperGridPane(int numRows, int numCols){
-		makeGrid(numRows, numCols);
+	public P2_Peng_Kevin_MinesweeperGridPane(){
 	}
 	
-	public void makeGrid(int numRows, int numCols){
-		getChildren().clear();
-		nodes = new ImageView[numRows][numCols];
-		for(int r = 0; r < numRows; r++){
-			for(int c = 0; c < numCols; c++){
-				nodes[r][c] = new ImageView();
-				add(nodes[r][c], c, r);
-			}
+	/**
+	 * Sets the image at a row col location. If the row col does not contain a node, create it
+	 * @param row The row index of the image to set
+	 * @param col The column index of the image to set
+	 * @param image The image the node will be set to
+	 */
+	public void setImageRowCol(int row, int col, Image image){
+		ImageView node = getNodeFromRowCol(row, col);
+		if(node == null){
+			add(new ImageView(image), col, row);
+		}else{
+			node.setImage(image);
 		}
 	}
 	
-	public void setImageRowCol(int row, int col, Image image){
-		getNodeFromRowCol(row, col).setImage(image);
-	}
-	
+	/**
+	 * Sets the image at the x y location. If the node there does not exist, do nothing
+	 * @param x The x location of the node
+	 * @param y The y location of the node
+	 * @param image The image the node will be set to
+	 */
 	public void setImageXY(int x, int y, Image image){
-		getNodeFromXY(x, y).setImage(image);
+		ImageView node = getNodeFromXY(x, y);
+		if(node != null){
+			node.setImage(image);
+		}
+		
 	}
 	
 	public ImageView getNodeFromRowCol(int row, int col){
-		return nodes[row][col];
+		for(Node node : getChildren()){
+			if(GridPane.getRowIndex(node) == row && GridPane.getColumnIndex(node) == col){
+				return (ImageView) node;
+			}
+		}
+		return null;
 	}
 	
 	public ImageView getNodeFromXY(double x, double y){
@@ -54,6 +67,10 @@ public class P2_Peng_Kevin_MinesweeperGridPane extends GridPane{
 			}
 		}
 		return null;
+	}
+	
+	public void clear(){
+		getChildren().clear();
 	}
 
 }

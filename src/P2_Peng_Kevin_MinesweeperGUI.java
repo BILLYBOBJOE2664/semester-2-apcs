@@ -1,7 +1,9 @@
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
+import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -32,7 +34,12 @@ import javafx.stage.Stage;
 
 public class P2_Peng_Kevin_MinesweeperGUI extends Application implements P2_Peng_Kevin_MSModelListener{
 	
+	private Stage stage;
+	private BorderPane root;
 	private boolean isRunning;
+	private int width;
+	private int height;
+	private int numMines;
 	
 	private Label minesLeft;
 	private Label time;
@@ -68,17 +75,20 @@ public class P2_Peng_Kevin_MinesweeperGUI extends Application implements P2_Peng
 	}
 
 	@Override
-	public void start(Stage stage) throws Exception {
+	public void start(Stage s) throws Exception {
+		stage = s;
 		loadImages();
-		grid = new P2_Peng_Kevin_MinesweeperModel(10, 10, 10);
+		
+		width = 10;
+		height = 10;
+		numMines = 10;
+		isRunning = false;
+		
+		grid = new P2_Peng_Kevin_MinesweeperModel(width, height, numMines);
 		grid.addListeners(this);
 		
-		stage.setTitle("Minesweeper");
-		BorderPane root = new BorderPane();
-		Scene scene = new Scene(root);
-		stage.setScene(scene);
-		
-		makeGUI(root);
+
+		makeGUI();
 		
 		resetTimer();
 		timer = new AnimationTimer(){
@@ -92,13 +102,8 @@ public class P2_Peng_Kevin_MinesweeperGUI extends Application implements P2_Peng
 			
 		};
 		
-		face = new ImageView(faceSmile);
-		
-		
-		
-		gridPane = new P2_Peng_Kevin_MinesweeperGridPane(grid.getNumRows(), grid.getNumCols());
+		gridPane = new P2_Peng_Kevin_MinesweeperGridPane();
 		updateAll();
-		isRunning = true;
 		gridPane.setOnMousePressed(new EventHandler<MouseEvent>(){
 			@Override
 			public void handle(MouseEvent e) {
@@ -137,15 +142,20 @@ public class P2_Peng_Kevin_MinesweeperGUI extends Application implements P2_Peng
 			}
 			
 		});
-		Group group = new Group();
-		face.setX(gridPane.prefWidth(-1)/2 - face.prefWidth(-1)/2);
-		face.setY(0);
-		gridPane.setLayoutX(0);
-		gridPane.setLayoutY(face.prefHeight(-1));
-		group.getChildren().addAll(face, gridPane);
-		root.setCenter(group);
+		gridPane.maxWidthProperty().set(gridPane.prefWidth(-1));
+		VBox vbox = new VBox(face, gridPane);
+		vbox.setAlignment(Pos.TOP_CENTER);
+		root.setCenter(vbox);
 		
+		play(width, height, numMines);
 		stage.show();
+	}
+	
+	private void play(int width, int height, int numMines){
+		timer.stop();
+		face.setImage(faceSmile);
+		grid.createGrid(width, height, numMines);
+		isRunning = true;
 	}
 	
 	/**
@@ -224,7 +234,12 @@ public class P2_Peng_Kevin_MinesweeperGUI extends Application implements P2_Peng
 		}
 	}
 	
-	private void makeGUI(BorderPane root){
+	private void makeGUI(){
+		stage.setTitle("Minesweeper");
+		root = new BorderPane();
+		Scene scene = new Scene(root);
+		stage.setScene(scene);
+		
 		minesLeft = new Label("Mines Left: " + grid.getNumMinesLeft());
 		time = new Label("Time: 0");
 		HBox labelBox = new HBox(minesLeft, time);
@@ -235,13 +250,63 @@ public class P2_Peng_Kevin_MinesweeperGUI extends Application implements P2_Peng
 		
 		Menu gameMenu = new Menu("Game");
 		MenuItem newGame = new MenuItem("New Game");
+		newGame.setOnAction(new EventHandler<ActionEvent>(){
+
+			@Override
+			public void handle(ActionEvent e) {
+				play(width, height, numMines);
+			}
+			
+		});
 		MenuItem beginnerGame = new MenuItem("New Beginner Game");
+		beginnerGame.setOnAction(new EventHandler<ActionEvent>(){
+			
+			@Override
+			public void handle(ActionEvent e){
+				width = 10;
+				height = 10;
+				numMines = 10;
+				play(width, height, numMines);
+			}
+			
+		});
 		MenuItem intermediateGame = new MenuItem("New Intermediate Game");
+		intermediateGame.setOnAction(new EventHandler<ActionEvent>(){
+
+			@Override
+			public void handle(ActionEvent event) {
+				width = 15;
+				height = 12;
+				numMines = 25;
+				play(width, height, numMines);
+			}
+			
+		});
 		MenuItem expertGame = new MenuItem("New Expert Game");
+		expertGame.setOnAction(new EventHandler<ActionEvent>(){
+
+			@Override
+			public void handle(ActionEvent event) {
+				width = 25;
+				height = 20;
+				numMines = 80;
+				play(width, height, numMines);
+			}
+			
+		});
 		gameMenu.getItems().addAll(newGame, beginnerGame, intermediateGame, expertGame);
 		
 		Menu optionMenu = new Menu("Options");
 		MenuItem setMines = new MenuItem("Set Number of Mines");
+		setMines.setOnAction(new EventHandler<ActionEvent>(){
+
+			@Override
+			public void handle(ActionEvent arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+		});
 		MenuItem gridSize = new MenuItem("Set Grid Size");
 		MenuItem exit = new MenuItem("Exit");
 		optionMenu.getItems().addAll(setMines, gridSize, exit);
@@ -255,6 +320,16 @@ public class P2_Peng_Kevin_MinesweeperGUI extends Application implements P2_Peng
 		
 		VBox topBox = new VBox(menubar, labelBox);
 		root.setTop(topBox);
+		
+		face = new ImageView(faceSmile);
+		face.setOnMouseClicked(new EventHandler<MouseEvent>(){
+
+			@Override
+			public void handle(MouseEvent e) {
+				play(width, height, numMines);
+			}
+			
+		});
 	}
 	
 	private void loadImages(){
@@ -287,7 +362,11 @@ public class P2_Peng_Kevin_MinesweeperGUI extends Application implements P2_Peng
 
 	@Override
 	public void modelChanged() {
-		gridPane.makeGrid(grid.getNumRows(), grid.getNumCols());
+		minesLeft.setText("Mines Left: " + grid.getNumMinesLeft());
+		resetTimer();
+		gridPane.clear();
+		updateAll();
+		stage.sizeToScene();
 	}
 	
 	
