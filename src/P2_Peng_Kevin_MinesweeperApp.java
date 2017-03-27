@@ -1,16 +1,24 @@
+import java.io.File;
+import java.net.MalformedURLException;
+import java.util.Optional;
+
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.Group;
-import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TextInputDialog;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
@@ -19,6 +27,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 
 /**
@@ -28,11 +37,19 @@ import javafx.stage.Stage;
  * Spent 50 minutes
  * 
  * The problem I'm facing is that I can't detect which node got clicked. Everything else is fine I think.
+ * 
+ * HW 5
+ * Mar 26, 2017
+ * Spent 1 hour 30 minutes
+ * The main problem was that I had to do research on how to use classes like input dialog and webview. I didn't realize that input dialog had a waitAndShow()
+ * method at first so I tried to make a really convoluted system to try and build it myself. I also had to change the way the incorrect bomb was displayed to function
+ * with quick-reveal. Originally, the last revealed location was passed in as a parameter but I changed it so that it detects if a cell is a mine and revealed
+ * Everything else was pretty straightforward.
  *
  */
 
 
-public class P2_Peng_Kevin_MinesweeperGUI extends Application implements P2_Peng_Kevin_MSModelListener{
+public class P2_Peng_Kevin_MinesweeperApp extends Application implements P2_Peng_Kevin_MSModelListener{
 	
 	private Stage stage;
 	private BorderPane root;
@@ -79,8 +96,8 @@ public class P2_Peng_Kevin_MinesweeperGUI extends Application implements P2_Peng
 		stage = s;
 		loadImages();
 		
-		width = 10;
-		height = 10;
+		width = 8;
+		height = 8;
 		numMines = 10;
 		isRunning = false;
 		
@@ -125,7 +142,11 @@ public class P2_Peng_Kevin_MinesweeperGUI extends Application implements P2_Peng
 						int row = GridPane.getRowIndex(node);
 						int col = GridPane.getColumnIndex(node);
 						if(e.getButton() == MouseButton.PRIMARY && !grid.isFlagged(row, col)){
-							grid.reveal(row, col);
+							if(!grid.isRevealed(row, col)){
+								grid.reveal(row, col);
+							}else{
+								grid.quickReveal(row, col);
+							}
 						}else if(e.getButton() == MouseButton.SECONDARY && !grid.isRevealed(row, col)){
 							grid.setFlagged(row, col, !grid.isFlagged(row, col));
 						}
@@ -133,7 +154,7 @@ public class P2_Peng_Kevin_MinesweeperGUI extends Application implements P2_Peng
 							displayWon();
 							isRunning = false;
 						}else if(grid.hasLost()){
-							displayLost(row, col);
+							displayLost();
 							isRunning = false;
 							
 						}
@@ -144,7 +165,8 @@ public class P2_Peng_Kevin_MinesweeperGUI extends Application implements P2_Peng
 		});
 		gridPane.maxWidthProperty().set(gridPane.prefWidth(-1));
 		VBox vbox = new VBox(face, gridPane);
-		vbox.setAlignment(Pos.TOP_CENTER);
+		gridPane.setAlignment(Pos.CENTER);
+		vbox.setAlignment(Pos.CENTER);
 		root.setCenter(vbox);
 		
 		play(width, height, numMines);
@@ -160,20 +182,19 @@ public class P2_Peng_Kevin_MinesweeperGUI extends Application implements P2_Peng
 	
 	/**
 	 * Displays all unrevealed mines, shows all incorrect flags, and sets the color of the user revealed mine to bombDeath
-	 * @param row The row the of the mine that was revealed
-	 * @param col The column of the mine that was revealed
 	 */
-	private void displayLost(int row, int col){
+	private void displayLost(){
 		for(int r = 0; r < grid.getNumRows(); r++){
 			for(int c = 0; c < grid.getNumCols(); c++){
-				if(grid.isMine(r, c) && !grid.isRevealed(r, c) && !grid.isFlagged(r, c)){
+				if(grid.isMine(r, c) && grid.isRevealed(r, c)){
+					gridPane.setImageRowCol(r, c, bombDeath);
+				}else if(grid.isMine(r, c) && !grid.isRevealed(r, c) && !grid.isFlagged(r, c)){
 					gridPane.setImageRowCol(r, c, bombRevealed);
 				}else if(!grid.isMine(r, c) && grid.isFlagged(r, c)){
 					gridPane.setImageRowCol(r, c, bombWrong);
 				}
 			}
 		}
-		gridPane.setImageRowCol(row, col, bombDeath);
 		face.setImage(faceDead);
 		timer.stop();
 	}
@@ -207,7 +228,9 @@ public class P2_Peng_Kevin_MinesweeperGUI extends Application implements P2_Peng
 	}
 	
 	private void updateNode(int row, int col){
-		if(grid.isFlagged(row, col)){
+		if(grid.isMine(row, col) && grid.isRevealed(row, col)){
+			gridPane.setImageRowCol(row, col, bombDeath);
+		}else if(grid.isFlagged(row, col)){
 			gridPane.setImageRowCol(row, col, bombFlagged);
 		}else if(!grid.isRevealed(row, col)){
 			gridPane.setImageRowCol(row, col, blank);
@@ -263,8 +286,8 @@ public class P2_Peng_Kevin_MinesweeperGUI extends Application implements P2_Peng
 			
 			@Override
 			public void handle(ActionEvent e){
-				width = 10;
-				height = 10;
+				width = 8;
+				height = 8;
 				numMines = 10;
 				play(width, height, numMines);
 			}
@@ -275,9 +298,9 @@ public class P2_Peng_Kevin_MinesweeperGUI extends Application implements P2_Peng
 
 			@Override
 			public void handle(ActionEvent event) {
-				width = 15;
-				height = 12;
-				numMines = 25;
+				width = 16;
+				height = 16;
+				numMines = 40;
 				play(width, height, numMines);
 			}
 			
@@ -287,33 +310,114 @@ public class P2_Peng_Kevin_MinesweeperGUI extends Application implements P2_Peng
 
 			@Override
 			public void handle(ActionEvent event) {
-				width = 25;
-				height = 20;
-				numMines = 80;
+				width = 31;
+				height = 16;
+				numMines = 99;
 				play(width, height, numMines);
 			}
 			
 		});
-		gameMenu.getItems().addAll(newGame, beginnerGame, intermediateGame, expertGame);
+		MenuItem customGame = new MenuItem("New Custom Game");
+		customGame.setOnAction(new EventHandler<ActionEvent>(){
+			
+			@Override
+			public void handle(ActionEvent e){
+				int newWidth = getValueFromUser("Set Width", "Width");
+				int newHeight = getValueFromUser("Set Height", "Height");
+				int newNumMines = getValueFromUser("Set Number of Mines", "Number of mines");
+				if(newNumMines < 0 || newNumMines > newWidth*newHeight){
+					Alert alert = new Alert(AlertType.ERROR, "Invalid Parameter", ButtonType.OK);
+					alert.showAndWait();
+				}else{
+					width = newWidth;
+					height = newHeight;
+					numMines = newNumMines;
+					play(width, height, numMines);
+				}
+			}
+		});
+		
+		MenuItem exit = new MenuItem("Exit");
+		exit.setOnAction(new EventHandler<ActionEvent>(){
+			
+			@Override
+			public void handle(ActionEvent e){
+				Platform.exit();
+			}
+		});
+		gameMenu.getItems().addAll(newGame, beginnerGame, intermediateGame, expertGame, customGame, exit);
 		
 		Menu optionMenu = new Menu("Options");
 		MenuItem setMines = new MenuItem("Set Number of Mines");
 		setMines.setOnAction(new EventHandler<ActionEvent>(){
 
 			@Override
-			public void handle(ActionEvent arg0) {
-				// TODO Auto-generated method stub
-				
+			public void handle(ActionEvent e) {
+				int newNumMines = getValueFromUser("Set Number of Mines", "Number of Mines");
+				if(newNumMines < 0 || newNumMines > width*height){
+					Alert alert = new Alert(AlertType.ERROR, "Invalid Parameter", ButtonType.OK);
+					alert.showAndWait();
+				}else{
+					numMines = newNumMines;
+					play(width, height, numMines);
+				}
 			}
 			
 		});
 		MenuItem gridSize = new MenuItem("Set Grid Size");
-		MenuItem exit = new MenuItem("Exit");
-		optionMenu.getItems().addAll(setMines, gridSize, exit);
+		gridSize.setOnAction(new EventHandler<ActionEvent>(){
+			
+			@Override
+			public void handle(ActionEvent e){
+				int newWidth = getValueFromUser("Set Width","Width");
+				int newHeight = getValueFromUser("Set Height", "Height");
+				if(newWidth < 0 || newHeight < 0){
+					Alert alert = new Alert(AlertType.ERROR, "Invalid Parameter", ButtonType.OK);
+					alert.showAndWait();
+				}else{
+					width = newWidth;
+					height = newHeight;
+					play(width, height, numMines);
+				}
+			}
+		});
+		
+		optionMenu.getItems().addAll(setMines, gridSize);
 		
 		Menu helpMenu = new Menu("Help");
 		MenuItem instructions = new MenuItem("How To Play");
+		instructions.setOnAction(new EventHandler<ActionEvent>(){
+			
+			@Override
+			public void handle(ActionEvent e){
+				Stage stage = new Stage();
+				stage.setTitle("How To Play");
+				WebView webView = new WebView();
+				ScrollPane scrollPane = new ScrollPane(webView);
+				scrollPane.setFitToHeight(true);
+				scrollPane.setFitToWidth(true);
+				webView.getEngine().load("file:///" + new File("minesweeper/P2_Peng_Kevin_MinesweeperInstructions.html").getAbsolutePath());
+				stage.setScene(new Scene(scrollPane));
+				stage.show();
+			}
+		});
 		MenuItem about = new MenuItem("About");
+		about.setOnAction(new EventHandler<ActionEvent>(){
+			
+			@Override
+			public void handle(ActionEvent e){
+				Stage stage = new Stage();
+				stage.setTitle("About");
+				WebView webView = new WebView();
+				ScrollPane scrollPane = new ScrollPane(webView);
+				scrollPane.setFitToHeight(true);
+				scrollPane.setFitToWidth(true);
+				webView.getEngine().load("file:///" + new File("minesweeper/P2_Peng_Kevin_MinesweeperAbout.html").getAbsolutePath());
+				stage.setScene(new Scene(scrollPane));
+				stage.show();
+			}
+			
+		});
 		helpMenu.getItems().addAll(instructions, about);
 		
 		menubar.getMenus().addAll(gameMenu, optionMenu, helpMenu);
@@ -331,6 +435,24 @@ public class P2_Peng_Kevin_MinesweeperGUI extends Application implements P2_Peng
 			
 		});
 	}
+	
+	private int getValueFromUser(String title, String prompt){
+		TextInputDialog dialog = new TextInputDialog();
+		dialog.setTitle(title);
+		dialog.setHeaderText(null);
+		dialog.setContentText(prompt);
+		Optional<String> result = dialog.showAndWait();
+		if(result.isPresent()){
+			try{
+				return Integer.parseInt(result.get());
+			}catch(NumberFormatException e){
+				return -1;
+			}
+		}
+		return -1;
+		
+	}
+	
 	
 	private void loadImages(){
 		blank = new Image("file:minesweeper/images/blank.gif");

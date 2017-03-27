@@ -45,22 +45,56 @@ public class P2_Peng_Kevin_MinesweeperModel implements P2_Peng_Kevin_MSModel {
 			l.modelChanged();
 		}
 	}
-
+	/**
+	 * Generate numMines more mines in non mine unrevealed squares.
+	 * If the number of mines to generate is greater than the number of non mine unrevealed squares, the fill the rest of the non mine unrevealed squares with mines
+	 * @param numMines The number of mines to add to the board
+	 */
 	private void generateMines(int numMines) {
-		Random rand = new Random();
-		for(int i = 0; i < numMines; i++){
-			while(true){
-				int r = rand.nextInt(getNumRows());
-				int c = rand.nextInt(getNumCols());
-				if(!isMine(r, c) && !isRevealed(r, c)){
-					grid[r][c].setIsMine(true);
-					for(P2_Peng_Kevin_MSModelListener l : listeners){
-						l.cellChanged(r, c);
+		if(getNumRows() * getNumCols() - getNumHiddenMines() - getNumRevealed() <= numMines){
+			for(int r = 0; r < getNumRows(); r++){
+				for(int c = 0; c < getNumCols(); c++){
+					if(!isMine(r, c) && !isRevealed(r, c)){
+						grid[r][c].setIsMine(true);
 					}
-					break;
+				}
+			}
+		}else{
+		Random rand = new Random();
+			for(int i = 0; i < numMines; i++){
+				while(true){
+					int r = rand.nextInt(getNumRows());
+					int c = rand.nextInt(getNumCols());
+					if(!isMine(r, c) && !isRevealed(r, c)){
+						grid[r][c].setIsMine(true);
+						for(P2_Peng_Kevin_MSModelListener l : listeners){
+							l.cellChanged(r, c);
+						}
+						break;
+					}
 				}
 			}
 		}
+	}
+
+	private int getNumHiddenMines(){
+		int sum = 0;
+		for(int r = 0; r < getNumRows(); r++){
+			for(int c = 0; c < getNumCols(); c++){
+				if(isMine(r, c) && !isRevealed(r, c)) sum++;
+			}
+		}
+		return sum;
+	}
+	
+	private int getNumRevealed(){
+		int sum = 0;
+		for(int r = 0; r < getNumRows(); r++){
+			for(int c = 0; c < getNumCols(); c++){
+				if(isRevealed(r, c)) sum++;
+			}
+		}
+		return sum;
 	}
 
 	public int getNumNeighborMines(int row, int col){
@@ -90,6 +124,34 @@ public class P2_Peng_Kevin_MinesweeperModel implements P2_Peng_Kevin_MSModel {
 		}
 		return sum;
 	}
+	
+	private int getNumNeighborFlags(int row, int col){
+		int sum = 0;
+		//top row
+		if(row > 0){
+			//left
+			if(col > 0 && isFlagged(row - 1, col - 1)) sum++;
+			//center
+			if(isFlagged(row - 1, col)) sum++;
+			//right
+			if(col < getNumCols() - 1 && isFlagged(row - 1, col + 1)) sum++;
+		}
+		//center row
+		//left
+		if(col > 0 && isFlagged(row , col - 1)) sum++;
+		//right
+		if(col < getNumCols() - 1 && isFlagged(row, col + 1)) sum++;
+		//bottom row
+		if(row < getNumRows() - 1){
+			//left
+			if(col > 0 && isFlagged(row + 1, col - 1)) sum++;
+			//center
+			if(isFlagged(row + 1, col)) sum++;
+			//right
+			if(col < getNumCols() - 1 && isFlagged(row + 1, col + 1)) sum++;
+		}
+		return sum;
+	}
 
 	public boolean isMine(int row, int col) {
 		return grid[row][col].isMine();
@@ -97,6 +159,39 @@ public class P2_Peng_Kevin_MinesweeperModel implements P2_Peng_Kevin_MSModel {
 
 	public boolean isRevealed(int row, int col) {
 		return grid[row][col].isRevealed();
+	}
+	
+	/**
+	 * If the cell at (row, col) is revealed and the number of neighboring mines equals the number of neighboring flags, reveal all surrounding unflagged cells
+	 * @param row The row index of the cell
+	 * @param col The column index of the cell
+	 */
+	public void quickReveal(int row, int col){
+		if(getNumNeighborFlags(row, col) == getNumNeighborMines(row, col)){
+			//top row
+			if(row > 0){
+				//left
+				if(col > 0 && !isFlagged(row - 1, col - 1)) reveal(row - 1, col - 1);
+				//center
+				if(!isFlagged(row - 1, col)) reveal(row - 1, col);
+				//right
+				if(col < getNumCols() - 1 && !isFlagged(row - 1, col + 1)) reveal(row - 1, col + 1);
+			}
+			//center row
+			//left
+			if(col > 0 && !isFlagged(row , col - 1))reveal(row, col - 1);
+			//right
+			if(col < getNumCols() - 1 && !isFlagged(row, col + 1)) reveal(row, col + 1);
+			//bottom row
+			if(row < getNumRows() - 1){
+				//left
+				if(col > 0 && !isFlagged(row + 1, col - 1)) reveal(row + 1, col - 1);
+				//center
+				if(!isFlagged(row + 1, col)) reveal(row + 1, col);
+				//right
+				if(col < getNumCols() - 1 && !isFlagged(row + 1, col + 1)) reveal(row + 1, col + 1);
+			}
+		}
 	}
 
 	public void reveal(int row, int col) {
@@ -205,7 +300,7 @@ public class P2_Peng_Kevin_MinesweeperModel implements P2_Peng_Kevin_MSModel {
 		
 		private int state;
 		private boolean isMine;
-		
+				
 		public Cell(boolean isMine){
 			state = DEFAULT;
 			this.isMine = isMine;
