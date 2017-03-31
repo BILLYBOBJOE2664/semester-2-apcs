@@ -7,6 +7,8 @@
  */
 package p2_Peng_Kevin_GraphicsEngine;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -45,14 +47,54 @@ public abstract class World extends Pane{
 	}
 	
 	public List<Actor> getObjects(){
-		
+		return getObjects(Actor.class);
 	}
 	
+	@SuppressWarnings("unchecked")
 	public <A extends Actor>List<A> getObjects(Class<A> cls){
+		ArrayList<A> list = new ArrayList<A>();
 		for(Node node : getChildren()){
-			if(node instanceof cls){
-				
+			if(cls.isInstance(node)){
+				list.add((A)node);
 			}
 		}
+		return list;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public <A extends Actor>List<A> getTouchableObjects(Class<A> cls){
+		ArrayList<A> list =  new ArrayList<>();
+		for(Node node : getChildren()){
+			if(cls.isInstance(node) && touchableActors.contains(node)){
+				list.add((A)node);
+			}
+		}
+		return list;
+	}
+	
+	public void remove(Actor actor){
+		getChildren().remove(actor);
+		touchableActors.remove(actor);
+	}
+	
+	public void remove(Collection<? extends Actor> actors){
+		getChildren().removeAll(actors);
+		touchableActors.removeAll(actors);
+	}
+	
+	public void setTouchable(Actor actor, boolean touchable){
+		if(touchable && !touchableActors.contains(actor)){
+			touchableActors.add(actor);
+		}else if(!touchable){
+			touchableActors.remove(actor);
+		}
+	}
+	
+	public void start(){
+		timer.start();
+	}
+	
+	public void stop(){
+		timer.stop();
 	}
 }

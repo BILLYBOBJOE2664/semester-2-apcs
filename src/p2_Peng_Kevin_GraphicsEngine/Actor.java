@@ -59,7 +59,8 @@ public abstract class Actor extends ImageView {
 	public void setIsTouchable(boolean isTouchable){
 		if(getWorld() == null){
 			throw new RuntimeException("Error: Can't set touchable when the actor is not in a world");
+		}else{
+			getWorld().setTouchable(this, isTouchable);
 		}
-		//TODO
 	}
 }
