@@ -11,6 +11,9 @@
  */
 package p2_Peng_Kevin_Demo;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javafx.event.EventHandler;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyEvent;
@@ -19,6 +22,12 @@ import p2_Peng_Kevin_GraphicsEngine.Actor;
 public class Ball extends Actor {
 	double dx;
 	double dy;
+	//for collision so that the speed doesn't change until the next frame
+	double newDx;
+	double newDy;
+	//prevents repeated collisions against the same object and getting stuck
+	ArrayList<Ball> noCollision;
+	ArrayList<Integer> noCollisionCooldown;
 	
 	public Ball(){
 		setUp(Math.random()*6 - 3, Math.random()*6 - 3);
@@ -32,6 +41,10 @@ public class Ball extends Actor {
 		setImage(new Image("file:minesweeper/images/bomb_wrong.gif"));
 		this.dx = dx;
 		this.dy = dy;
+		newDx = dx;
+		newDy = dy;
+		noCollision = new ArrayList<Ball>();
+		noCollisionCooldown = new ArrayList<Integer>();
 		setOnKeyPressed(new EventHandler<KeyEvent>(){
 
 			@Override
@@ -41,56 +54,83 @@ public class Ball extends Actor {
 			
 		});
 	}
+	
+	public double getDx(){
+		return dx;
+	}
+	
+	public double getDy(){
+		return dy;
+	}
+	
 	private void randomizeSpeed(){
-		dx = Math.random()*6 - 3;
-		dy = Math.random()*6 - 3;
+		newDx = Math.random()*6 - 3;
+		newDy = Math.random()*6 - 3;
 	}
 	@Override
 	public void act(long now) {
+		dx = newDx;
+		dy = newDy;
 		move(dx, dy);
 		handleCollisions();
 		
 	}
 	
 	public void handleCollisions(){
+		//check noCollision
+		for(int i = 0; i < noCollision.size(); i++){
+			if(noCollisionCooldown.get(i) == 0);
+			noCollision.remove(i);
+			noCollisionCooldown.remove(i);
+			i--;
+		}
 		//left
 		if(getLayoutX() < 0){
-			dx = -dx;
+			newDx = -dx;
 			setLayoutX(0);
 		}
 		//right
 		if(getLayoutX() + getWidth() > getWorld().getWidth()){
-			dx = -dx;
+			newDx = -dx;
 			setLayoutX(getWorld().getWidth() - getWidth());
 		}
 		//top
 		if(getLayoutY() < 0){
-			dy = -dy;
+			newDy = -dy;
 			setLayoutY(0);
 		}
 		//bottom
 		if(getLayoutY() + getHeight() > getWorld().getHeight()){
-			dy = -dy;
+			newDy = -dy;
 			setLayoutY(getWorld().getHeight() - getHeight());
 		}
 		
-		Actor a = getOneIntersectingObject(Actor.class);
+		List<Ball> aList = getIntersectingObjects(Ball.class);
+		Ball a = null;
+		for(Ball ball : aList){
+			if(!noCollision.contains(ball)){
+				a = ball;
+				noCollision.add(ball);
+				noCollisionCooldown.add(3);
+				break;
+			}
+		}
 		if(a != null){
 			double leftDist = getLayoutX() + getWidth()/2 - a.getLayoutX() - a.getWidth()/2;
 			double topDist = getLayoutY() + getHeight()/2 - a.getLayoutY() - a.getHeight()/2;
 			//left
 			if(Math.abs(leftDist) > Math.abs(topDist) && leftDist >= 0){
-				if(dx < 0) dx = -dx;
+				newDx = a.getDx();
 			}//right
 			else if(Math.abs(leftDist) > Math.abs(topDist) && leftDist <= 0){
-				if(dx > 0) dx = -dx;
+				newDx = a.getDx();
 			}
 			//top
 			else if(Math.abs(topDist) > Math.abs(leftDist) && topDist >= 0){
-				if(dy < 0) dy = -dy;
+				newDy = a.getDy();
 			}//bottom
 			else if(Math.abs(topDist) > Math.abs(leftDist) && topDist <= 0){
-				if(dy > 0 ) dy = -dy;
+				newDy = a.getDy();
 			}
 		}
 	}

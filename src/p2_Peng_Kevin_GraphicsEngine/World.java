@@ -11,10 +11,7 @@ package p2_Peng_Kevin_GraphicsEngine;
 
 import java.util.ArrayList;
 import java.util.Collection;
-<<<<<<< HEAD
-=======
 import java.util.LinkedHashSet;
->>>>>>> 7e011865ed37cac69ad32eaf4e09b56e2ebc223d
 import java.util.List;
 import java.util.Set;
 
@@ -108,28 +105,22 @@ public abstract class World extends Pane{
 	
 	@SuppressWarnings("unchecked")
 	public <A extends Actor>List<A> getObjects(Class<A> cls){
-<<<<<<< HEAD
-=======
 		ArrayList<A> list = new ArrayList<>();
 		for(Node node : getChildren()){
 			if(cls.isInstance(node)){
 				list.add((A)node);
 			};
->>>>>>> 7e011865ed37cac69ad32eaf4e09b56e2ebc223d
 		}
 		return list;
 	}
 	
 	@SuppressWarnings("unchecked")
 	public <A extends Actor>List<A> getTouchableObjects(Class<A> cls){
-<<<<<<< HEAD
-=======
 		ArrayList<A> list = new ArrayList<>();
 		for(Node node : touchableActors){
 			if(cls.isInstance(node)){
 				list.add((A)node);
-			};
->>>>>>> 7e011865ed37cac69ad32eaf4e09b56e2ebc223d
+			}
 		}
 		return list;
 	}
@@ -145,13 +136,10 @@ public abstract class World extends Pane{
 	}
 	
 	public void setTouchable(Actor actor, boolean touchable){
-<<<<<<< HEAD
-=======
 		if(!touchable){
 			touchableActors.remove(actor);
 		}else if(!touchableActors.contains(actor)){
 			touchableActors.add(actor);
->>>>>>> 7e011865ed37cac69ad32eaf4e09b56e2ebc223d
 		}
 	}
 	

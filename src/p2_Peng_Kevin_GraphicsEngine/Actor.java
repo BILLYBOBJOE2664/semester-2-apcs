@@ -35,7 +35,7 @@ public abstract class Actor extends ImageView {
 		ArrayList<A> list = new ArrayList<>();
 		if(getWorld() == null) return list;
 		for(A actor : getWorld().getTouchableObjects(cls)){
-			if(actor != this && actor.intersects(getBoundsInLocal())){
+			if(actor != this && actor.getBoundsInParent().intersects(getBoundsInParent())){
 				list.add(actor);
 			}
 		}
@@ -72,10 +72,7 @@ public abstract class Actor extends ImageView {
 		if(getWorld() == null){
 			throw new RuntimeException("Error: Can't set touchable when the actor is not in a world");
 		}else{
-			getWorld().setTouchable(this, isTouchable);
+			getWorld().setTouchable(this, touchable);
 		}
-<<<<<<< HEAD
-=======
->>>>>>> 7e011865ed37cac69ad32eaf4e09b56e2ebc223d
 	}
 }
