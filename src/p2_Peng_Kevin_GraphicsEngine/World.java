@@ -1,19 +1,30 @@
 /**
  * Kevin Peng
  * Period 2
- * Mar 29, 2017
- * Took
+ * April 2, 2017
+ * Took 3 hours
  * 
+ * I wasn't sure which set implementation to use so I just went with the linked hashset so that getOneIntersectingObject() in the actor class is consistent. I also forgot to check if the
+ * key event handler is null.
  */
 package p2_Peng_Kevin_GraphicsEngine;
 
 import java.util.ArrayList;
 import java.util.Collection;
+<<<<<<< HEAD
+=======
+import java.util.LinkedHashSet;
+>>>>>>> 7e011865ed37cac69ad32eaf4e09b56e2ebc223d
 import java.util.List;
 import java.util.Set;
 
 import javafx.animation.AnimationTimer;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.event.EventHandler;
 import javafx.scene.Node;
+import javafx.scene.Scene;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Pane;
 
 public abstract class World extends Pane{
@@ -21,22 +32,67 @@ public abstract class World extends Pane{
 	private Set<Actor> touchableActors;
 	
 	public World(){
+		touchableActors = new LinkedHashSet<Actor>();
 		timer = new AnimationTimer(){
-			
 			@Override
 			public void handle(long now){
-				for(Node node : getChildren()){
-					if(node instanceof Actor){
-						((Actor) node).act(now);
-					}
-				}
+				act(now);
 			}
 			
 		};
+		
+		sceneProperty().addListener(new ChangeListener<Scene>(){
+
+			@Override
+			public void changed(ObservableValue<? extends Scene> observable, Scene oldVal, Scene newVal) {
+				if(newVal != null){
+					newVal.setOnKeyPressed(new EventHandler<KeyEvent>(){
+						
+						@Override
+						public void handle(KeyEvent e){
+							if(getOnKeyPressed() != null){
+								getOnKeyPressed().handle(e);
+							}
+							for(Node node : getChildren()){
+								if(node.getOnKeyPressed() != null){
+									node.getOnKeyPressed().handle(e);
+								}
+							}
+						}
+						
+					});
+					
+					newVal.setOnKeyReleased(new EventHandler<KeyEvent>(){
+						
+						@Override
+						public void handle(KeyEvent e){
+							if(getOnKeyReleased() != null){
+								getOnKeyReleased().handle(e);
+							}
+							for(Node node : getChildren()){
+								if(node.getOnKeyReleased() != null){
+									node.getOnKeyReleased().handle(e);
+								}
+							}
+						}
+					});
+				}
+			}
+			
+		});
+	}
+	
+	public void act(long now){
+		for(Node node : getChildren()){
+			if(node instanceof Actor){
+				((Actor) node).act(now);
+			}
+		}
 	}
 	
 	public void add(Actor actor){
 		getChildren().add(actor);
+		touchableActors.add(actor);
 	}
 	
 	public void add(Actor actor, boolean isTouchable){
@@ -52,22 +108,28 @@ public abstract class World extends Pane{
 	
 	@SuppressWarnings("unchecked")
 	public <A extends Actor>List<A> getObjects(Class<A> cls){
-		ArrayList<A> list = new ArrayList<A>();
+<<<<<<< HEAD
+=======
+		ArrayList<A> list = new ArrayList<>();
 		for(Node node : getChildren()){
 			if(cls.isInstance(node)){
 				list.add((A)node);
-			}
+			};
+>>>>>>> 7e011865ed37cac69ad32eaf4e09b56e2ebc223d
 		}
 		return list;
 	}
 	
 	@SuppressWarnings("unchecked")
 	public <A extends Actor>List<A> getTouchableObjects(Class<A> cls){
-		ArrayList<A> list =  new ArrayList<>();
-		for(Node node : getChildren()){
-			if(cls.isInstance(node) && touchableActors.contains(node)){
+<<<<<<< HEAD
+=======
+		ArrayList<A> list = new ArrayList<>();
+		for(Node node : touchableActors){
+			if(cls.isInstance(node)){
 				list.add((A)node);
-			}
+			};
+>>>>>>> 7e011865ed37cac69ad32eaf4e09b56e2ebc223d
 		}
 		return list;
 	}
@@ -83,10 +145,13 @@ public abstract class World extends Pane{
 	}
 	
 	public void setTouchable(Actor actor, boolean touchable){
-		if(touchable && !touchableActors.contains(actor)){
-			touchableActors.add(actor);
-		}else if(!touchable){
+<<<<<<< HEAD
+=======
+		if(!touchable){
 			touchableActors.remove(actor);
+		}else if(!touchableActors.contains(actor)){
+			touchableActors.add(actor);
+>>>>>>> 7e011865ed37cac69ad32eaf4e09b56e2ebc223d
 		}
 	}
 	
